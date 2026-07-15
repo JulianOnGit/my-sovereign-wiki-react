@@ -153,3 +153,34 @@ export async function generateArticleSummary(article) {
 
   return runLLM({ system: WIKI_SYSTEM, prompt: lines.join("\n"), maxTokens: 512 });
 }
+
+const ASK_SYSTEM =
+  "You are the retrieval assistant for a person's private knowledge wiki. Answer the " +
+  "question using ONLY the numbered notes provided — they are the user's own " +
+  "observations, retrieved from their Pod. Ground every claim in those notes and cite " +
+  "them inline with bracketed numbers like [1] or [2], matching the note numbers you " +
+  "used. Use no outside knowledge and invent nothing — no facts, names, dates, or " +
+  "numbers that are not in the notes. If the notes do not answer the question, say so " +
+  "plainly (e.g. \"Your notes don't cover that yet\") instead of guessing. Be concise " +
+  "and plain: two to five sentences, no preamble, no headings.";
+
+/// Grounded RAG synthesis (Retrieve stage). Given the ranked citations the local
+/// index already retrieved, the user's own AI writes a natural-language answer
+/// that may draw ONLY on those notes and must cite them by their 1-based number,
+/// so every claim traces back to a real resource in the Pod. Retrieval stays
+/// local (provenance); the model only composes over what was already grounded.
+export async function answerFromSources({ query, sources }) {
+  const lines = [`Question: ${query}`, "", "Notes (your own observations):"];
+  sources.forEach((s, i) => {
+    const it = s.item;
+    const head = it.title || (it.body || "").trim().split("\n")[0] || "(observation)";
+    const detail = [it.body, it.interpretation, it.context]
+      .filter(Boolean)
+      .join(" ")
+      .replace(/\s+/g, " ")
+      .trim()
+      .slice(0, 400);
+    lines.push(`[${i + 1}] ${head}${detail && detail !== head ? ` — ${detail}` : ""}`);
+  });
+  return runLLM({ system: ASK_SYSTEM, prompt: lines.join("\n"), maxTokens: 400 });
+}

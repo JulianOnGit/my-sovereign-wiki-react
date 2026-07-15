@@ -1176,6 +1176,52 @@ code {
   font-family: inherit;
   line-height: 1.55;
 }
+.grounded-block {
+  margin-bottom: 0.4rem;
+}
+.grounded-answer {
+  margin: 0;
+  font-size: 1.02rem;
+  line-height: 1.6;
+}
+.cite-ref {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 0.7em;
+  padding: 0 0.1em;
+  cursor: help;
+}
+.grounded-note {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-style: italic;
+  margin: 0.5rem 0 0;
+}
+.grounded-status {
+  margin: 0 0 0.2rem;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.grounded-status::after {
+  content: "▍";
+  animation: blink 1s step-start infinite;
+}
+@keyframes blink {
+  50% { opacity: 0; }
+}
+.grounded-hint {
+  margin: 0.9rem 0 0;
+  padding-top: 0.7rem;
+  border-top: 1px dashed var(--border);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.citation-num {
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
 .citation-list {
   margin-top: 0.9rem;
 }
