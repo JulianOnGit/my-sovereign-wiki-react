@@ -8,7 +8,7 @@ import Wiki from "./components/Wiki.jsx";
 import AskPod from "./components/AskPod.jsx";
 import Organise from "./components/Organise.jsx";
 import Present from "./components/Present.jsx";
-import Journey from "./components/Journey.jsx";
+import Reflect from "./components/Reflect.jsx";
 import Share from "./components/Share.jsx";
 import Govern from "./components/Govern.jsx";
 import {
@@ -30,7 +30,7 @@ const TABS = [
   { label: "Organise", slug: "organise" },
   { label: "Explore", slug: "explore" },
   { label: "Ask your Pod", slug: "ask" },
-  { label: "Journey", slug: "journey" },
+  { label: "Reflect", slug: "reflect" },
   { label: "Share", slug: "share" },
   { label: "Govern", slug: "govern" },
 ];
@@ -202,7 +202,7 @@ export default function App() {
             {tab === "Organise" && <Organise items={items} onOrganise={handleOrganise} />}
             {tab === "Explore" && <Present items={items} />}
             {tab === "Ask your Pod" && <AskPod items={items} />}
-            {tab === "Journey" && <Journey items={items} />}
+            {tab === "Reflect" && <Reflect items={items} />}
             {tab === "Share" && dataset && <Share session={session} dataset={dataset} />}
             {tab === "Govern" && dataset && (
               <Govern session={session} dataset={dataset} items={items} />

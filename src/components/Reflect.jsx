@@ -9,9 +9,10 @@ import {
   matrixPosition,
 } from "../lib/eudaimonia.js";
 
-// Journey — the user's semantic ecosystem read as a picture of the good life:
-// capabilities, developmental stages, a roadmap, and the projects that move the
-// journey forward, prioritised on an effort × benefit matrix.
+// Reflect — a plain-language mirror of what you've been capturing. It reads
+// back your own notes and draws out the patterns: what you've been focused on
+// lately, which parts of life your notes touch, and a few concrete next steps
+// worth your time. Nothing is graded, and nothing here leaves your Pod.
 
 const capName = (key) => CAPABILITIES.find((c) => c.key === key)?.name ?? key;
 const stageName = (key) => STAGES.find((s) => s.key === key)?.name ?? key;
@@ -24,16 +25,16 @@ function jitter(id) {
   return ((h % 100) / 100 - 0.5) * 7; // ±3.5%
 }
 
-export default function Journey({ items }) {
+export default function Reflect({ items }) {
   const model = useMemo(() => analyseEcosystem(items), [items]);
   const [hover, setHover] = useState(null);
 
   if (items.length === 0) {
     return (
       <p className="empty">
-        Your journey builds itself from what you capture. Add a few observations —
-        especially ones where something emerged — and a picture of your capabilities,
-        stage, and next projects appears here.
+        Reflect grows out of what you capture. Jot down a few things you’ve
+        noticed, thought about, or want to do — then come back here to see the
+        bigger picture and what might be worth doing next.
       </p>
     );
   }
@@ -42,19 +43,37 @@ export default function Journey({ items }) {
 
   return (
     <div className="journey">
+      {/* What this is / how to use it */}
+      <div className="card">
+        <h2 className="section-heading">Reflect</h2>
+        <p className="muted">
+          Reflect looks back over the notes you’ve captured and shows you the
+          bigger picture: what you’ve been thinking about, which parts of life
+          you’re paying attention to, and a few things worth doing next. Nothing
+          here is graded, and none of it leaves your Pod — the more you capture,
+          the more it can show you.
+        </p>
+      </div>
+
       {/* Snapshot */}
       <div className="card">
-        <h2 className="section-heading">Where you are on the journey</h2>
+        <h3 className="section-heading">Where you are right now</h3>
         <p className="muted">
-          Your recent focus is <strong>{focusStage.name}</strong>, and your captures
-          reach as far as <strong>{frontierStage.name}</strong>. This is read from
-          your own observations — a living model, not a test result.
+          Most of your recent notes are about <strong>{focusStage.name}</strong>.
+          A few also reach into <strong>{frontierStage.name}</strong> — the
+          newest ground you’re starting to explore.
         </p>
       </div>
 
       {/* Roadmap stepper */}
       <div className="card">
-        <h3 className="section-heading">Roadmap</h3>
+        <h3 className="section-heading">Your path</h3>
+        <p className="muted">
+          People tend to build a good life in steps, from getting settled all
+          the way to really thriving. The highlighted step is the furthest your
+          notes reach so far, and the bars show where most of your attention has
+          been.
+        </p>
         <div className="roadmap">
           {stages.map((s, i) => {
             const state =
@@ -78,7 +97,12 @@ export default function Journey({ items }) {
 
       {/* Capabilities */}
       <div className="card">
-        <h3 className="section-heading">Capabilities for a good life</h3>
+        <h3 className="section-heading">Areas of your life</h3>
+        <p className="muted">
+          How much your notes touch each part of life. A short bar just means
+          you haven’t written much about it yet — it’s a hint about where you
+          might look next, not a score.
+        </p>
         <div className="capability-grid">
           {capabilities.map((c) => (
             <div key={c.key} className="capability">
@@ -106,14 +130,16 @@ export default function Journey({ items }) {
 
       {/* Prioritisation matrix */}
       <div className="card">
-        <h3 className="section-heading">Prioritisation matrix</h3>
+        <h3 className="section-heading">Where to focus next</h3>
         <p className="muted">
-          Effort increases to the left, benefit upward — so the top-right corner is
-          where the quick wins live.
+          Each dot is something you could do next. Dots higher up are more
+          worthwhile; dots further right take less effort. So the top-right
+          corner — worthwhile and easy — is the best place to start. Hover over a
+          dot to see what it is.
         </p>
         <div className="matrix-wrap">
-          <span className="axis-y">Benefit →</span>
-          <div className="matrix" role="img" aria-label="Projects plotted by effort and benefit">
+          <span className="axis-y">More worthwhile →</span>
+          <div className="matrix" role="img" aria-label="Possible next steps placed by effort and how much they'd help">
             <div className="quad q-major">
               <span>{QUADRANTS.major.name}</span>
             </div>
@@ -140,7 +166,7 @@ export default function Journey({ items }) {
                   onMouseLeave={() => setHover(null)}
                   onFocus={() => setHover(p)}
                   onBlur={() => setHover(null)}
-                  aria-label={`${p.title}: effort ${p.effort}, benefit ${p.benefit}`}
+                  aria-label={`${p.title}: effort ${p.effort} of 4, how much it helps ${p.benefit} of 4`}
                 />
               );
             })}
@@ -155,22 +181,23 @@ export default function Journey({ items }) {
               >
                 <strong>{hover.title}</strong>
                 <span>
-                  {QUADRANTS[quadrantOf(hover)].name} · effort {hover.effort}/4 · benefit{" "}
+                  {QUADRANTS[quadrantOf(hover)].name} · effort {hover.effort}/4 · helps{" "}
                   {hover.benefit}/4
                 </span>
               </div>
             )}
           </div>
-          <span className="axis-x">← Effort</span>
+          <span className="axis-x">← Takes more effort</span>
         </div>
       </div>
 
       {/* Projects, grouped by quadrant */}
       <div className="card">
-        <h3 className="section-heading">Projects</h3>
+        <h3 className="section-heading">Next steps to consider</h3>
         <p className="muted">
-          An open-ended set of moves toward the life you are building — drawn from
-          what emerged in your captures, and from where the picture is thin.
+          Real things pulled from your own notes — ideas, questions, and things
+          you said you wanted to do, learn, or make. They’re grouped by how much
+          they’d help for the effort involved, so start at the top.
         </p>
         {QUAD_ORDER.map((q) => {
           const list = projects.filter((p) => quadrantOf(p) === q);
@@ -187,7 +214,7 @@ export default function Journey({ items }) {
                     <span className="tag tag-lens">{capName(p.capability)}</span>
                     <span className="tag">{stageName(p.stage)}</span>
                     <span className="effort-benefit">
-                      effort {p.effort}/4 · benefit {p.benefit}/4
+                      effort {p.effort}/4 · helps {p.benefit}/4
                     </span>
                   </div>
                   <p className="project-rationale">{p.rationale}</p>

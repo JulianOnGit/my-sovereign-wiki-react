@@ -14,42 +14,42 @@
 export const CAPABILITIES = [
   {
     key: "virtue",
-    name: "Virtue enablement",
+    name: "Living your values",
     blurb: "Acting well: honesty, temperance, compassion, justice, gratitude.",
     aspects: ["honesty", "temperance", "compassion", "justice", "patience", "gratitude", "humility"],
   },
   {
     key: "phronesis",
-    name: "Practical wisdom",
+    name: "Making good decisions",
     blurb: "Good judgement in context: reflection, foresight, prioritisation, learning.",
     aspects: ["judgement", "reflection", "foresight", "prioritisation", "learning", "insight", "mastery"],
   },
   {
     key: "social",
-    name: "Social goods",
+    name: "Connection with others",
     blurb: "Being with and for others: relationships, community, belonging, contribution.",
     aspects: ["relationships", "community", "belonging", "contribution", "communication", "care"],
   },
   {
     key: "material",
-    name: "Material goods",
+    name: "Everyday wellbeing",
     blurb: "The conditions of life: health, home, finances, resources, environment.",
     aspects: ["health", "home", "finances", "resources", "environment", "rest", "energy"],
   },
   {
     key: "courage",
-    name: "Moral courage",
+    name: "Doing the right thing",
     blurb: "Doing the hard right thing: integrity, boundaries, standing for values.",
     aspects: ["integrity", "speaking up", "boundaries", "standing for values", "difficult action", "stewardship"],
   },
 ];
 
 export const STAGES = [
-  { key: "safety", name: "Safety baseline", blurb: "Secure the basics — health, stability, freedom from acute risk." },
-  { key: "order", name: "Tending towards order", blurb: "Bring structure — routines, systems, a manageable environment." },
-  { key: "identity", name: "Identity establishment", blurb: "Clarify who you are — values, purpose, an authentic self." },
-  { key: "better", name: "A better life", blurb: "Grow deliberately — goals, skills, projects, progress." },
-  { key: "makariotic", name: "A makariotic life", blurb: "Flourishing — meaning, joy, gratitude, love, contribution to the whole." },
+  { key: "safety", name: "Getting settled", blurb: "The basics in place — health, stability, and everyday security." },
+  { key: "order", name: "Getting organised", blurb: "Bringing in structure — routines, systems, a manageable day-to-day." },
+  { key: "identity", name: "Knowing yourself", blurb: "Getting clear on who you are — your values, purpose, and what feels authentic." },
+  { key: "better", name: "Living and working", blurb: "Growing on purpose — goals, skills, projects, and steady progress." },
+  { key: "makariotic", name: "A flourishing life", blurb: "Really thriving — meaning, joy, gratitude, love, and giving back." },
 ];
 
 export const stageIndex = (key) => STAGES.findIndex((s) => s.key === key);
@@ -87,7 +87,7 @@ const LENS_CAPABILITY = {
 };
 
 const STAGE_KEYWORDS = {
-  safety: ["safe", "risk", "danger", "secure", "health", "emergency", "protect", "threat", "stable", "afford", "survive", "anxious", "worry"],
+  safety: ["settled", "secure", "safe", "health", "stable", "steady", "afford", "basics", "wellbeing", "rest", "calm"],
   order: ["organis", "organiz", "plan", "schedule", "tidy", "system", "routine", "sort", "structure", "manage", "clean", "backlog", "declutter"],
   identity: ["who", "value", "purpose", "believe", "identity", "meaning", "authentic", "principle", "vocation", "calling", "self"],
   better: ["goal", "improve", "grow", "build", "develop", "progress", "better", "ambition", "project", "learn", "practice", "milestone"],
@@ -278,10 +278,10 @@ export function quadrantOf(project) {
 }
 
 export const QUADRANTS = {
-  "quick-wins": { name: "Quick wins", hint: "Low effort · high benefit — do first", tone: "good" },
-  major: { name: "Major projects", hint: "High effort · high benefit — plan for these", tone: "accent" },
-  "fill-ins": { name: "Fill-ins", hint: "Low effort · low benefit — when time allows", tone: "muted" },
-  reconsider: { name: "Reconsider", hint: "High effort · low benefit — is it worth it?", tone: "warn" },
+  "quick-wins": { name: "Quick wins", hint: "Easy and worthwhile — do these first", tone: "good" },
+  major: { name: "Big projects", hint: "Worthwhile but takes real effort — plan for these", tone: "accent" },
+  "fill-ins": { name: "Nice extras", hint: "Easy but minor — when you have spare time", tone: "muted" },
+  reconsider: { name: "Maybe skip", hint: "A lot of effort for little payoff — is it worth it?", tone: "warn" },
 };
 
 // Rank used for default ordering: benefit dominates, effort breaks ties.

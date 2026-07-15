@@ -603,7 +603,14 @@ code {
   gap: 0.85rem;
 }
 
-/* ── Journey — eudaimonia ─────────────────────────────────────────────────── */
+/* The Organise action sits between block paragraphs (Tailwind zeroes their
+   margins), so give it its own vertical breathing room. */
+.organise .save {
+  display: inline-block;
+  margin: 1rem 0 0.5rem;
+}
+
+/* ── Reflect — eudaimonia (class prefix stays .journey) ───────────────────── */
 .roadmap {
   display: flex;
   gap: 0.5rem;
