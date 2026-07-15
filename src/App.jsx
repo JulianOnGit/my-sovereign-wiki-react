@@ -5,6 +5,7 @@ import Capture from "./components/Capture.jsx";
 import WikiList from "./components/WikiList.jsx";
 import AskPod from "./components/AskPod.jsx";
 import Organise from "./components/Organise.jsx";
+import Present from "./components/Present.jsx";
 import {
   getOrCreateWikiDataset,
   readItems,
@@ -16,7 +17,7 @@ import {
   getStorageInfo,
 } from "./lib/pod.js";
 
-const TABS = ["Capture", "Wiki", "Organise", "Ask your Pod"];
+const TABS = ["Capture", "Wiki", "Organise", "Explore", "Ask your Pod"];
 
 export default function App() {
   const { session, sessionRequestInProgress } = useSession();
@@ -150,6 +151,7 @@ export default function App() {
         )}
         {tab === "Wiki" && <WikiList items={items} onDelete={handleDelete} />}
         {tab === "Organise" && <Organise items={items} onOrganise={handleOrganise} />}
+        {tab === "Explore" && <Present items={items} />}
         {tab === "Ask your Pod" && <AskPod items={items} />}
       </main>
 

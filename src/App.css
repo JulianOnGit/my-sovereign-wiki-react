@@ -693,6 +693,133 @@ header > div {
   color: var(--muted);
 }
 
+/* Present / Explore — generated pages */
+.present {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.crumb {
+  align-self: flex-start;
+  border: none;
+  background: none;
+  color: var(--accent);
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+.page-title {
+  margin: 0 0 0.25rem;
+  font-size: 1.3rem;
+}
+
+.topic-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.topic-tile {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 8px;
+  padding: 0.4rem 0.7rem;
+  color: var(--text);
+}
+
+.topic-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.topic-count {
+  background: var(--bg);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  padding: 0.05rem 0.45rem;
+  color: var(--muted);
+}
+
+.date-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.date-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: none;
+  background: none;
+  border-bottom: 1px solid var(--border);
+  padding: 0.5rem 0.1rem;
+  color: var(--text);
+  font-size: 0.9rem;
+}
+
+.obs-rows {
+  display: flex;
+  flex-direction: column;
+  margin-top: 0.5rem;
+}
+
+.obs-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  border: none;
+  background: none;
+  border-top: 1px solid var(--border);
+  padding: 0.55rem 0.1rem;
+  color: var(--text);
+  text-align: left;
+}
+
+.obs-row:hover .obs-row-title {
+  color: var(--accent);
+}
+
+.obs-row-title {
+  font-size: 0.9rem;
+}
+
+.obs-row-date {
+  color: var(--muted);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.node-focus .body {
+  margin: 0.5rem 0;
+}
+
+.node-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.node-topics .tag {
+  border: 1px solid var(--accent);
+  background: transparent;
+  cursor: pointer;
+}
+
+.node-connections {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
 /* Store footer — one custody, inspectable linked data */
 .store-footer {
   display: flex;
