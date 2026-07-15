@@ -1,136 +1,166 @@
-// The five dimensions of a good life, as an *architectural map* of the
-// capabilities each dimension is built from — and the access grants that keep
-// those capabilities functioning.
+// The architecture of a good life, as a map of dimensions → areas → capabilities,
+// and the real-world supports whose access to the relevant slice of your wiki is
+// what lets each capability function.
 //
-// The premise: a capability isn't purely private. Many only work when someone
-// else can reach part of your wiki — a neighbour who can see your Care stream can
-// actually check in on you; a group who can read your Stewardship log can build
-// on it. So each capability "maintains" a set of access grants, and this map
-// shows, per dimension and per capability, exactly which grants are live — and
-// lets you control them in place.
+// The premise made concrete: your physiotherapist can only help your exercise if
+// they can see your exercise log; a housing service can only steady your home if
+// it can read the relevant notes. So a capability "maintains" the access grants
+// that enable it — and this map shows, per dimension and capability, exactly which
+// supports hold access, and lets you revoke any of them in place.
 //
-// Grants are tied to your value streams (journeys). Each capability names the
-// journeys that power it, so a journey-scoped grant lands under the right
-// capability. Grants that span the whole wiki (or a single note) aren't
-// capability-specific and are surfaced separately as reaching across everything.
+// The five dimensions are named as in Reflect's "Areas of your life"; the
+// capabilities follow a fuller good-life architecture. Nothing here is sent
+// anywhere — it lives only in the browser and is clearly an example.
 
-// Capability names follow Reflect's "Areas of your life" — the same common,
-// humane vocabulary (honesty, care, health, home, standing for your values…)
-// rather than clinical terms. The richer per-dimension breakdown takes its cue
-// from the good-life architecture, without copying it. Each capability names the
-// value streams (journeys) that power it, so a journey-scoped grant lands under
-// the right one; capabilities with no grant yet stay fully private.
+// Short helper so the capability lists below stay readable.
+const caps = (pairs) => pairs.map(([key, name]) => ({ key, name }));
+
 export const GOOD_LIFE_DOMAINS = [
   {
-    key: "virtue",
-    name: "Virtue-enablement",
+    key: "values",
+    name: "Living your values",
     icon: "🕊️",
     tone: "virtue",
-    blurb: "Living your values — being honest, fair, and kind, and grateful for what's good.",
-    capabilities: [
-      { key: "honesty", name: "Honesty", enables: "Being truthful with yourself and others", journeys: [] },
-      { key: "compassion", name: "Compassion", enables: "Meeting others with kindness", journeys: ["universal"] },
-      { key: "justice", name: "Fairness", enables: "Giving each their due", journeys: ["philosophy"] },
-      { key: "gratitude", name: "Gratitude", enables: "Appreciating what's good in life", journeys: ["benevolence"] },
-      { key: "patience", name: "Patience", enables: "Staying steady when things are hard", journeys: [] },
-      { key: "humility", name: "Humility", enables: "Holding your own views lightly", journeys: [] },
+    blurb: "Body, mind, and home in good order — the ground you act well from.",
+    groups: [
+      { key: "body", name: "Body", capabilities: caps([
+        ["body-cleanliness", "Cleanliness"], ["body-exercise", "Exercise"], ["body-sleep", "Sleep"],
+        ["body-diet", "Diet"], ["body-comfort", "Comfort"],
+      ]) },
+      { key: "mind", name: "Mind", capabilities: caps([
+        ["mind-clarity", "Clarity"], ["mind-congruence", "Congruence"], ["mind-hope", "Hope"],
+        ["mind-unafraidness", "Unafraidness"], ["mind-happiness", "Happiness"],
+      ]) },
+      { key: "home", name: "Home", capabilities: caps([
+        ["home-orderliness", "Orderliness"], ["home-alignment", "Alignment"], ["home-cleanliness", "Cleanliness"],
+        ["home-maintenance", "Maintenance"], ["home-safety", "Safety"],
+      ]) },
     ],
   },
   {
-    key: "phronesis",
-    name: "Practical wisdom",
+    key: "work",
+    name: "Doing meaningful work",
     icon: "🧭",
     tone: "phronesis",
-    blurb: "Doing meaningful work — good judgement, foresight, learning, and craft.",
-    capabilities: [
-      { key: "judgement", name: "Judgement", enables: "Weighing things up well", journeys: ["risk", "epistemology"] },
-      { key: "reflection", name: "Reflection", enables: "Making sense of what you notice", journeys: ["noticing"] },
-      { key: "foresight", name: "Foresight", enables: "Seeing where things are heading", journeys: ["future"] },
-      { key: "prioritisation", name: "Prioritisation", enables: "Knowing what matters most", journeys: [] },
-      { key: "learning", name: "Learning", enables: "Growing your understanding", journeys: ["learning"] },
-      { key: "insight", name: "Insight", enables: "Seeing what others miss, and making from it", journeys: ["creativity", "ingenuity"] },
-      { key: "mastery", name: "Mastery", enables: "Getting good at your craft", journeys: ["mastery"] },
+    blurb: "Work, projects, and routines that carry you forward on purpose.",
+    groups: [
+      { key: "work", name: "Work", capabilities: caps([
+        ["work-engaging", "Engaging"], ["work-communication", "Communication"], ["work-progression", "Progression"],
+        ["work-enjoyment", "Enjoyment"], ["work-safety", "Safety"],
+      ]) },
+      { key: "projects", name: "Projects", capabilities: caps([
+        ["projects-structure", "Structure"], ["projects-technical", "Technical"], ["projects-roadmap", "Roadmap"],
+        ["projects-operational", "Operational"], ["projects-results", "Results"],
+      ]) },
+      { key: "routines", name: "Routines", capabilities: caps([
+        ["routines-prioritisation", "Prioritisation"], ["routines-planning", "Planning"],
+        ["routines-time", "Time management"], ["routines-decisions", "Decision management"],
+        ["routines-reflection", "Reflection"],
+      ]) },
     ],
   },
   {
-    key: "social",
-    name: "Social goods",
+    key: "connection",
+    name: "Connection with others",
     icon: "🤝",
     tone: "social",
-    blurb: "Connection with others — care, belonging, contribution, and real conversation.",
-    capabilities: [
-      { key: "care", name: "Care", enables: "Looking out for the people who need it", journeys: ["care"] },
-      { key: "relationships", name: "Relationships", enables: "Close, trusting bonds", journeys: [] },
-      { key: "belonging", name: "Belonging", enables: "Feeling part of something bigger", journeys: ["culture"] },
-      { key: "community", name: "Community", enables: "Shared life and shared purpose", journeys: [] },
-      { key: "contribution", name: "Contribution", enables: "Giving something back", journeys: [] },
-      { key: "communication", name: "Communication", enables: "Being heard, and truly hearing others", journeys: ["partner"] },
+    blurb: "The people you're bound to — partner, family, friends, and community.",
+    groups: [
+      { key: "partner", name: "Partner", capabilities: caps([
+        ["partner-affection", "Affection"], ["partner-trust", "Trust"], ["partner-communication", "Communication"],
+        ["partner-shared-life", "Shared life"], ["partner-safety", "Safety"],
+      ]) },
+      { key: "family", name: "Family", capabilities: caps([
+        ["family-care", "Care"], ["family-support", "Support"], ["family-stability", "Stability"],
+        ["family-responsibility", "Responsibility"], ["family-belonging", "Belonging"],
+      ]) },
+      { key: "friendships", name: "Friendships", capabilities: caps([
+        ["friends-contact", "Contact"], ["friends-enjoyment", "Enjoyment"], ["friends-loyalty", "Loyalty"],
+        ["friends-conversation", "Conversation"], ["friends-support", "Mutual support"],
+      ]) },
+      { key: "community", name: "Community", capabilities: caps([
+        ["community-belonging", "Belonging"], ["community-contribution", "Contribution"],
+        ["community-recognition", "Recognition"], ["community-purpose", "Shared purpose"],
+        ["community-local", "Local connection"],
+      ]) },
     ],
   },
   {
-    key: "material",
-    name: "Material goods",
+    key: "wellbeing",
+    name: "Everyday wellbeing",
     icon: "🌿",
     tone: "material",
-    blurb: "Everyday wellbeing — health, home, resources, rest, and energy.",
-    capabilities: [
-      { key: "health", name: "Health", enables: "Body and mind well", journeys: [] },
-      { key: "home", name: "Home", enables: "A settled place to be", journeys: [] },
-      { key: "finances", name: "Finances", enables: "Enough, and secure", journeys: [] },
-      { key: "resources", name: "Resources", enables: "The things you need, to hand", journeys: [] },
-      { key: "rest", name: "Rest", enables: "Time to replenish and enjoy", journeys: ["leisure"] },
-      { key: "energy", name: "Energy", enables: "Feeling grounded and up to the day", journeys: ["calm"] },
+    blurb: "The material conditions a life stands on — enough, and secure.",
+    groups: [
+      { key: "needs", name: null, capabilities: caps([
+        ["need-money", "Money"], ["need-shelter", "Shelter"], ["need-food", "Food"], ["need-clothing", "Clothing"],
+        ["need-tools", "Tools"], ["need-transport", "Transport"], ["need-documents", "Documents"],
+        ["need-infrastructure", "Infrastructure"], ["need-future", "Future certainty"], ["need-justice", "Justice"],
+      ]) },
     ],
   },
   {
-    key: "courage",
-    name: "Moral courage-enablement",
+    key: "supported",
+    name: "Feeling well-supported",
     icon: "🔥",
     tone: "courage",
-    blurb: "Feeling well-supported — integrity, boundaries, and standing for what's right.",
-    capabilities: [
-      { key: "integrity", name: "Integrity", enables: "Living in line with your values", journeys: [] },
-      { key: "speaking-up", name: "Speaking up", enables: "Saying the hard thing when it counts", journeys: [] },
-      { key: "boundaries", name: "Boundaries", enables: "Protecting what matters to you", journeys: [] },
-      { key: "standing", name: "Standing for your values", enables: "Acting for the wider world", journeys: ["world"] },
-      { key: "difficult-action", name: "Difficult action", enables: "Doing what's right when it's costly", journeys: [] },
-      { key: "stewardship", name: "Stewardship", enables: "Leaving things better than you found them", journeys: ["stewardship"] },
+    blurb: "What lets you hold your ground and act for what's right.",
+    groups: [
+      { key: "courage", name: null, capabilities: caps([
+        ["courage-knowledge", "Moral knowledge"], ["courage-rhetoric", "Rhetorical skills"],
+        ["courage-evidence", "Evidence & documentation"], ["courage-advocacy", "Advocacy"],
+        ["courage-conflict", "Conflict navigation"], ["courage-boundaries", "Boundary assertion"],
+        ["courage-institutions", "Institutional navigation"], ["courage-fortitude", "Emotional fortitude"],
+      ]) },
     ],
   },
 ];
 
-/// Build the live domain → capability → grants map from the current grants.
-/// Journey-scoped grants attach to the capability their value stream powers;
-/// everything else (whole-wiki, topic, single-note) is returned as `spanning`,
-/// since it isn't tied to one capability.
-export function mapGoodLife(grants) {
-  const journeyToCap = new Map();
-  for (const domain of GOOD_LIFE_DOMAINS)
-    for (const cap of domain.capabilities)
-      for (const jk of cap.journeys) journeyToCap.set(jk, cap.key);
+// The supports that enable a capability by holding access to the relevant slice
+// of your wiki — a physiotherapist reading your exercise log, a housing service
+// steadying your home, a mentor following your progress. Each is scoped to one
+// capability and clearly an example.
+export const SUPPORT_GRANTS = [
+  { id: "sg-physio", capability: "body-exercise", holder: "Movewell Physiotherapy", role: "Physiotherapist", icon: "🧑‍⚕️", access: "view", purpose: "Reads your exercise log to tailor your rehab plan." },
+  { id: "sg-gp", capability: "body-sleep", holder: "Dr. Anya Rao", role: "General practitioner", icon: "🩺", access: "view", purpose: "Reviews your sleep to support your health." },
+  { id: "sg-dietitian", capability: "body-diet", holder: "Nourish Dietetics", role: "Dietitian", icon: "🥗", access: "comment", purpose: "Follows your diet notes and leaves guidance." },
+  { id: "sg-counsellor", capability: "mind-hope", holder: "Safe Harbour Counselling", role: "Counsellor", icon: "💬", access: "comment", purpose: "Supports your wellbeing between sessions." },
+  { id: "sg-homecare", capability: "home-maintenance", holder: "Neighbourly Home Support", role: "Home-support worker", icon: "🧰", access: "view", purpose: "Coordinates upkeep and repairs at home." },
+  { id: "sg-mentor", capability: "work-progression", holder: "Priya (mentor)", role: "Career mentor", icon: "🧑‍🏫", access: "comment", purpose: "Follows your progress to advise your next step." },
+  { id: "sg-collab", capability: "projects-results", holder: "Studio Collective", role: "Project collaborators", icon: "👥", access: "edit", purpose: "Works with you on shared project outcomes." },
+  { id: "sg-coach", capability: "routines-time", holder: "Focus Coaching", role: "Productivity coach", icon: "⏱️", access: "view", purpose: "Reviews how you spend your time to help you plan." },
+  { id: "sg-partner", capability: "partner-shared-life", holder: "Sam", role: "Partner", icon: "💞", access: "edit", purpose: "Shares the running of your life together." },
+  { id: "sg-family", capability: "family-care", holder: "Mara (sister)", role: "Family", icon: "👪", access: "comment", purpose: "Stays close to how you're doing, to care for you." },
+  { id: "sg-friend", capability: "friends-support", holder: "Jordan", role: "Close friend", icon: "🫂", access: "comment", purpose: "Your go-to for mutual support." },
+  { id: "sg-community", capability: "community-local", holder: "Rowan Street neighbours", role: "Community group", icon: "🏘️", access: "view", purpose: "Keeps you connected to the street." },
+  { id: "sg-finance", capability: "need-money", holder: "Fair Futures Financial", role: "Financial counsellor", icon: "💰", access: "view", purpose: "Helps you keep your finances secure." },
+  { id: "sg-housing", capability: "need-shelter", holder: "Housing Connect", role: "Housing service", icon: "🏠", access: "view", purpose: "Assists with keeping your housing stable." },
+  { id: "sg-legal", capability: "need-justice", holder: "Community Legal Centre", role: "Legal aid", icon: "⚖️", access: "comment", purpose: "Advises on your rights, reading only what's relevant." },
+  { id: "sg-advocate", capability: "courage-advocacy", holder: "Your advocate", role: "Advocate", icon: "📣", access: "comment", purpose: "Speaks up alongside you when it matters." },
+  { id: "sg-union", capability: "courage-institutions", holder: "Workers' Union", role: "Union support", icon: "🤝", access: "comment", purpose: "Helps you navigate institutions and stand your ground." },
+];
 
+/// Build the live map: attach each support grant to its capability, and count
+/// per domain. `spanning` (whole-wiki grants, e.g. the local AI) reach every
+/// capability and are surfaced separately.
+export function buildGoodLifeArchitecture(supportGrants = [], spanning = []) {
   const byCap = new Map();
-  const spanning = [];
-  for (const g of grants || []) {
-    const capKey = g.scope?.kind === "journey" ? journeyToCap.get(g.scope.key) : undefined;
-    if (capKey) {
-      if (!byCap.has(capKey)) byCap.set(capKey, []);
-      byCap.get(capKey).push(g);
-    } else {
-      spanning.push(g);
-    }
+  for (const g of supportGrants) {
+    if (!byCap.has(g.capability)) byCap.set(g.capability, []);
+    byCap.get(g.capability).push(g);
   }
 
-  const domains = GOOD_LIFE_DOMAINS.map((domain) => {
-    const capabilities = domain.capabilities.map((cap) => ({
-      ...cap,
-      grants: byCap.get(cap.key) || [],
-    }));
-    return {
-      ...domain,
-      capabilities,
-      grantCount: capabilities.reduce((n, c) => n + c.grants.length, 0),
-    };
+  const domains = GOOD_LIFE_DOMAINS.map((d) => {
+    let grantCount = 0;
+    const groups = d.groups.map((grp) => {
+      const capabilities = grp.capabilities.map((c) => {
+        const grants = byCap.get(c.key) || [];
+        grantCount += grants.length;
+        return { ...c, grants };
+      });
+      return { ...grp, capabilities };
+    });
+    return { ...d, groups, grantCount };
   });
 
   return { domains, spanning };

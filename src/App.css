@@ -3385,6 +3385,258 @@ code {
   border-color: color-mix(in srgb, var(--good) 30%, transparent);
 }
 
+/* ── Explore · home top bar + refresh ────────────────────────────────────────
+   The home view leads with a title and a Refresh control that re-lays the graph
+   and returns here from anywhere. */
+.explore-topbar {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+.explore-topbar-text {
+  flex: 1;
+  min-width: 0;
+}
+.explore-home-title {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.15;
+}
+.explore-home-sub {
+  margin: 0.2rem 0 0;
+  font-size: 0.9rem;
+}
+.explore-refresh {
+  flex: none;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.1s;
+}
+.explore-refresh:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-2));
+}
+.explore-refresh:active {
+  transform: rotate(-8deg);
+}
+
+/* Sub-page crumb row: back + a persistent "Explore home" refresh. */
+.crumb-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.crumb-refresh {
+  margin-left: auto;
+}
+
+/* ── Explore · knowledge graph ───────────────────────────────────────────────
+   A force-laid network of observations, wired by their AI-drawn links. Purely
+   decorative in layout, but every node is the real observation and opens it. */
+.explore-graph-card {
+  overflow: hidden;
+}
+.explore-graph-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.3rem 0.7rem;
+  margin-bottom: 0.5rem;
+}
+.graph-hint {
+  font-size: 0.8rem;
+}
+.explore-graph {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 100 / 60;
+  background:
+    radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--accent) 7%, transparent), transparent 70%),
+    var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  touch-action: manipulation;
+}
+.graph-edge {
+  stroke: color-mix(in srgb, var(--accent) 35%, var(--border));
+  stroke-width: 0.25;
+  opacity: 0.7;
+}
+.graph-node {
+  cursor: pointer;
+  outline: none;
+}
+.graph-node-halo {
+  fill: color-mix(in srgb, var(--accent) 16%, transparent);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.graph-node-dot {
+  fill: var(--accent);
+  stroke: var(--card);
+  stroke-width: 0.4;
+  transition: fill 0.15s;
+}
+.graph-node-label {
+  fill: var(--muted);
+  font-size: 2.1px;
+  font-weight: 600;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.graph-node:hover .graph-node-halo,
+.graph-node:focus-visible .graph-node-halo,
+.graph-node:hover .graph-node-label,
+.graph-node:focus-visible .graph-node-label {
+  opacity: 1;
+}
+.graph-node:hover .graph-node-dot,
+.graph-node:focus-visible .graph-node-dot {
+  fill: color-mix(in srgb, var(--accent) 80%, var(--good));
+}
+
+/* ── Explore · chain progress + interactive continuations ────────────────────
+   Each stage of a chain offers a list of continuations: one golden thread that
+   continues the arc to the solution, plus branches into the wider graph. */
+.chain-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.chain-progress {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.chain-restart {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+}
+.chain-restart:hover {
+  text-decoration: underline;
+}
+.chain-continue {
+  margin-top: 0.7rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.chain-continue-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--muted);
+}
+.chain-cont {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 12px;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  transition: border-color 0.15s, transform 0.1s, background 0.15s;
+}
+.chain-cont:hover {
+  transform: translateX(2px);
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+.chain-cont-golden {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  border-left: 3px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface-2));
+}
+.chain-cont-branch {
+  border-left: 3px dashed var(--border);
+}
+.chain-cont-top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.chain-cont-lead {
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+}
+.chain-cont-lead-branch {
+  color: var(--muted);
+}
+.chain-cont-headline {
+  font-weight: 600;
+  font-size: 0.92rem;
+}
+.chain-cont-connector {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-style: italic;
+}
+.chain-solved {
+  margin-top: 0.7rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed color-mix(in srgb, var(--good) 35%, var(--border));
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.chain-solved-badge {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--good);
+}
+.chain-restart-solid {
+  margin-left: auto;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.28rem 0.7rem;
+  background: var(--surface-2);
+}
+.chain-restart-solid:hover {
+  text-decoration: none;
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .explore-refresh:active {
+    transform: none;
+  }
+  .chain-cont,
+  .graph-node-halo,
+  .graph-node-dot,
+  .graph-node-label {
+    transition: none;
+  }
+}
+
 /* ── Ask · the inspiration loop ──────────────────────────────────────────────
    A self-running reel under the search box: the wiki "wonders" a question,
    thinks, and answers with a Read more, then loops. Decorative but live. */
@@ -4322,4 +4574,116 @@ code {
 .audit-event-revoke {
   flex: none;
   align-self: center;
+}
+
+/* ── Share · good-life map: areas → capabilities → supports ──────────────────
+   Reworked to the fuller architecture: grouped capabilities, the ones enabled by
+   a real-world support shown in full, the rest as compact private chips. */
+.goodlife-group {
+  margin-top: 0.7rem;
+}
+.goodlife-group + .goodlife-group {
+  margin-top: 0.9rem;
+}
+.goodlife-group-name {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gl, var(--muted));
+  margin-bottom: 0.4rem;
+}
+.goodlife-cap {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.55rem 0.65rem;
+  background: var(--surface-2);
+  margin-bottom: 0.45rem;
+}
+.goodlife-cap.has-grants {
+  background: var(--card);
+  border-color: color-mix(in srgb, var(--gl, var(--accent)) 32%, var(--border));
+  border-left: 3px solid var(--gl, var(--accent));
+}
+.goodlife-cap-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.4rem;
+}
+.goodlife-cap-name {
+  font-weight: 650;
+  font-size: 0.86rem;
+  color: var(--text);
+}
+.goodlife-cap-tag {
+  font-size: 0.58rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--gl, var(--accent));
+  background: color-mix(in srgb, var(--gl, var(--accent)) 14%, transparent);
+  border-radius: 999px;
+  padding: 0.08rem 0.45rem;
+}
+.goodlife-private {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.goodlife-private-chip {
+  font-size: 0.72rem;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.14rem 0.55rem;
+  opacity: 0.8;
+}
+.goodlife-support {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+.goodlife-support + .goodlife-support {
+  margin-top: 0.35rem;
+}
+.goodlife-support-icon {
+  font-size: 1.05rem;
+  flex: none;
+}
+.goodlife-support-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  min-width: 0;
+  flex: 1;
+}
+.goodlife-support-who {
+  font-size: 0.83rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.goodlife-support-role {
+  font-weight: 400;
+  color: var(--muted);
+}
+.goodlife-support-purpose {
+  font-size: 0.74rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.goodlife-support-access {
+  flex: none;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.goodlife-support .revoke {
+  flex: none;
 }

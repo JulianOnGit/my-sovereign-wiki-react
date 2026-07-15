@@ -24,7 +24,7 @@ import {
   scopeIcon,
   scopeLabel,
 } from "../lib/shareDemo.js";
-import { mapGoodLife } from "../lib/goodLife.js";
+import { buildGoodLifeArchitecture, SUPPORT_GRANTS } from "../lib/goodLife.js";
 import { buildAuditFeed, AUDIT_EVENT_TYPES, timeAgo } from "../lib/accessLog.js";
 
 // Share stage — purpose-led, fine-grained consent.
@@ -208,7 +208,10 @@ export default function Share({ session, dataset, items = [] }) {
         </p>
       </div>
 
-      <GoodLifeMap shares={shares} onRevoke={handleRevokeShare} />
+      <GoodLifeMap
+        spanning={shares.filter((g) => g.scope?.kind === "wiki")}
+        onRevokeSpanning={handleRevokeShare}
+      />
 
       <GrantComposer
         subjectKind={subjectKind} setSubjectKind={setSubjectKind}
@@ -493,36 +496,43 @@ function ShareCard({ grant, onRevoke }) {
   );
 }
 
-// ── The architectural map: dimensions → capabilities → grants ─────────────────
-// A structural view of the same grants: the five dimensions of a good life, each
-// broken into the capabilities it's built from, each capability showing the
-// access grants that keep it functioning — controllable in place. Modelled on
-// "Areas of your life" in Reflect, extended so the good-life model and the
-// consent model are one picture.
-function GoodLifeMap({ shares, onRevoke }) {
-  const { domains, spanning } = useMemo(() => mapGoodLife(shares), [shares]);
+// ── The architectural map: dimensions → areas → capabilities → supports ───────
+// A structural view of your life's capabilities and the real-world supports that
+// enable each one by holding access to the relevant slice of your wiki — your
+// physiotherapist reading your exercise log, a housing service steadying your
+// home. Dimensions are named as in Reflect's "Areas of your life"; capabilities
+// follow a fuller good-life architecture. Every support is revocable in place.
+function GoodLifeMap({ spanning = [], onRevokeSpanning }) {
+  // The support grants are the map's own controllable state, so revoking one is
+  // reflected immediately.
+  const [supports, setSupports] = useState(SUPPORT_GRANTS);
+  const { domains } = useMemo(
+    () => buildGoodLifeArchitecture(supports, spanning),
+    [supports, spanning],
+  );
+  const revokeSupport = (id) => setSupports((prev) => prev.filter((g) => g.id !== id));
 
   return (
     <div className="card goodlife">
       <div className="share-list-head">
         <h3 className="section-heading">The architecture of your good life</h3>
-        <span className="share-count-pill">{shares.length}</span>
+        <span className="share-count-pill">{supports.length} supports</span>
       </div>
       <p className="muted">
-        The five dimensions of a good life, broken into the capabilities each is
-        built from. Many capabilities only work when someone else can reach part of
-        your wiki — so each one maintains its own access grants. Here's what's live
-        under every capability, and you can revoke any of it in place.
+        The five areas of your life, each broken into the capabilities it's built
+        from — and the people, services, and institutions that <em>enable</em> each
+        capability by holding access to the relevant slice of your wiki. A capability
+        with no grant stays entirely private. Revoke any support in place.
       </p>
 
       {spanning.length > 0 && (
         <div className="goodlife-spanning">
           <div className="goodlife-spanning-head">
-            <span aria-hidden="true">♾️</span> Reaching across every dimension
+            <span aria-hidden="true">♾️</span> Reaching across every capability
           </div>
           <div className="goodlife-grants">
             {spanning.map((g) => (
-              <GrantMini key={g.id} grant={g} onRevoke={onRevoke} />
+              <GrantMini key={g.id} grant={g} onRevoke={onRevokeSpanning} />
             ))}
           </div>
         </div>
@@ -538,30 +548,45 @@ function GoodLifeMap({ shares, onRevoke }) {
                 <span className="goodlife-domain-blurb">{d.blurb}</span>
               </div>
               <span className="goodlife-domain-count">
-                {d.grantCount} grant{d.grantCount === 1 ? "" : "s"}
+                {d.grantCount} support{d.grantCount === 1 ? "" : "s"}
               </span>
             </div>
-            <div className="goodlife-caps">
-              {d.capabilities.map((c) => (
-                <div key={c.key} className={"goodlife-cap" + (c.grants.length ? " has-grants" : "")}>
-                  <div className="goodlife-cap-head">
-                    <span className="goodlife-cap-name">{c.name}</span>
-                    <span className="goodlife-cap-enables">{c.enables}</span>
-                  </div>
-                  {c.grants.length ? (
-                    <div className="goodlife-grants">
-                      {c.grants.map((g) => (
-                        <GrantMini key={g.id} grant={g} onRevoke={onRevoke} />
+
+            {d.groups.map((grp) => {
+              const supported = grp.capabilities.filter((c) => c.grants.length);
+              const priv = grp.capabilities.filter((c) => !c.grants.length);
+              return (
+                <div key={grp.key} className="goodlife-group">
+                  {grp.name && <div className="goodlife-group-name">{grp.name}</div>}
+                  {supported.map((c) => (
+                    <div key={c.key} className="goodlife-cap has-grants">
+                      <div className="goodlife-cap-head">
+                        <span className="goodlife-cap-name">{c.name}</span>
+                        <span className="goodlife-cap-tag">enabled</span>
+                      </div>
+                      <div className="goodlife-grants">
+                        {c.grants.map((g) => (
+                          <SupportRow key={g.id} grant={g} onRevoke={() => revokeSupport(g.id)} />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  {priv.length > 0 && (
+                    <div className="goodlife-private">
+                      {priv.map((c) => (
+                        <span
+                          key={c.key}
+                          className="goodlife-private-chip"
+                          title="No access grants — this capability stays entirely private"
+                        >
+                          🔒 {c.name}
+                        </span>
                       ))}
                     </div>
-                  ) : (
-                    <p className="goodlife-cap-empty">
-                      No grants keep this running — it stays entirely private.
-                    </p>
                   )}
                 </div>
-              ))}
-            </div>
+              );
+            })}
           </div>
         ))}
       </div>
@@ -569,8 +594,31 @@ function GoodLifeMap({ shares, onRevoke }) {
   );
 }
 
-// One grant, rendered compactly inside a capability: who, the slice they reach,
-// what they can do, and an inline revoke.
+// One support that enables a capability: who they are and their role, the access
+// they hold, why, and an inline revoke.
+function SupportRow({ grant, onRevoke }) {
+  const access = ACCESS_LEVELS[grant.access];
+  return (
+    <div className="goodlife-support">
+      <span className="goodlife-support-icon" aria-hidden="true">{grant.icon}</span>
+      <div className="goodlife-support-body">
+        <span className="goodlife-support-who">
+          {grant.holder} <span className="goodlife-support-role">· {grant.role}</span>
+        </span>
+        {grant.purpose && <span className="goodlife-support-purpose">{grant.purpose}</span>}
+      </div>
+      <span className="goodlife-support-access" title={access?.blurb}>
+        {access?.icon} {access?.label}
+      </span>
+      <button className="revoke" onClick={onRevoke}>
+        Revoke
+      </button>
+    </div>
+  );
+}
+
+// One whole-wiki grant (e.g. the local AI) shown in the spanning band: who, the
+// slice they reach, what they can do, and an inline revoke.
 function GrantMini({ grant, onRevoke }) {
   const subjectMeta = SUBJECT_KINDS[grant.subject.kind];
   const access = ACCESS_LEVELS[grant.access];
@@ -589,9 +637,11 @@ function GrantMini({ grant, onRevoke }) {
         {access?.icon} {access?.label}
       </span>
       {grant.pending && <span className="pill pill-pending">Pending</span>}
-      <button className="revoke" onClick={() => onRevoke(grant)}>
-        Revoke
-      </button>
+      {onRevoke && (
+        <button className="revoke" onClick={() => onRevoke(grant)}>
+          Revoke
+        </button>
+      )}
     </div>
   );
 }
