@@ -21,16 +21,32 @@ import {
   uploadAttachment,
   getStorageInfo,
 } from "./lib/pod.js";
+import { useRoute } from "./lib/router.js";
 
-const TABS = ["Capture", "Wiki", "Organise", "Explore", "Ask your Pod", "Journey", "Share", "Govern"];
+// Each tab has a URL-hash slug so it can live in browser history.
+const TABS = [
+  { label: "Capture", slug: "capture" },
+  { label: "Wiki", slug: "wiki" },
+  { label: "Organise", slug: "organise" },
+  { label: "Explore", slug: "explore" },
+  { label: "Ask your Pod", slug: "ask" },
+  { label: "Journey", slug: "journey" },
+  { label: "Share", slug: "share" },
+  { label: "Govern", slug: "govern" },
+];
+const SLUG_TO_TAB = Object.fromEntries(TABS.map((t) => [t.slug, t.label]));
 
 export default function App() {
   const { session, sessionRequestInProgress } = useSession();
   const loggedIn = session.info.isLoggedIn;
 
+  const { segments, navigate } = useRoute();
+  // The active tab is derived from the URL hash, so browser back/forward and
+  // deep links "just work". Defaults to Capture when the hash is empty.
+  const tab = SLUG_TO_TAB[segments[0]] ?? "Capture";
+
   const [dataset, setDataset] = useState(null);
   const [items, setItems] = useState([]);
-  const [tab, setTab] = useState("Capture");
   const [status, setStatus] = useState(null);
   // Real Pod-connection error (drives the honest SolidStatus indicator), kept
   // separate from transient notices in `status`.
@@ -41,7 +57,8 @@ export default function App() {
   // registered redirect URI, so it is safe to rewrite now).
   useEffect(() => {
     if (loggedIn && window.location.pathname !== "/") {
-      window.history.replaceState({}, "", "/");
+      // Preserve any hash route while dropping the /redirect.html path + ?code.
+      window.history.replaceState({}, "", `/${window.location.hash}`);
     }
   }, [loggedIn]);
 
@@ -156,16 +173,16 @@ export default function App() {
           <nav className="mb-4 flex gap-1.5 overflow-x-auto pb-1">
             {TABS.map((t) => (
               <button
-                key={t}
-                onClick={() => setTab(t)}
+                key={t.slug}
+                onClick={() => navigate(t.slug)}
                 className={
                   "whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm transition " +
-                  (tab === t
+                  (tab === t.label
                     ? "bg-[var(--accent)] font-semibold text-white"
                     : "text-[var(--muted)] hover:bg-[var(--surface-2)]")
                 }
               >
-                {t}
+                {t.label}
               </button>
             ))}
           </nav>
@@ -179,7 +196,7 @@ export default function App() {
 
           <main>
             {tab === "Capture" && (
-              <Capture onAdd={handleAdd} onViewWiki={() => setTab("Wiki")} />
+              <Capture onAdd={handleAdd} onViewWiki={() => navigate("wiki")} />
             )}
             {tab === "Wiki" && <Wiki items={items} onDelete={handleDelete} />}
             {tab === "Organise" && <Organise items={items} onOrganise={handleOrganise} />}

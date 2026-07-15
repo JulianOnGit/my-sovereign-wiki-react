@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { collectTopics, collectDates, nodeView } from "../lib/pages.js";
+import { useRoute } from "../lib/router.js";
 
 // Present/Compose stage — navigable, human pages generated live from the graph.
 // A single component with an internal breadcrumb: the index (topics + dates),
@@ -19,15 +20,18 @@ function ObservationRow({ item, onOpen }) {
 }
 
 export default function Present({ items }) {
-  // view: { kind: "index" } | { kind: "topic", name } | { kind: "date", date }
-  //       | { kind: "node", id }
-  const [view, setView] = useState({ kind: "index" });
+  const { segments, navigate } = useRoute();
+  // View derived from the hash: #/explore, #/explore/topic/<name>,
+  // #/explore/date/<date>, #/explore/node/<id>.
+  const kind = ["topic", "date", "node"].includes(segments[1]) ? segments[1] : "index";
+  const value = segments[2];
 
   const topics = useMemo(() => collectTopics(items), [items]);
   const dates = useMemo(() => collectDates(items), [items]);
 
-  const openNode = (id) => setView({ kind: "node", id });
-  const openTopic = (name) => setView({ kind: "topic", name });
+  const openNode = (id) => navigate("explore", "node", id);
+  const openTopic = (name) => navigate("explore", "topic", name);
+  const goIndex = () => navigate("explore");
 
   if (items.length === 0) {
     return (
@@ -39,7 +43,7 @@ export default function Present({ items }) {
   }
 
   // ── Index ──────────────────────────────────────────────────────────────────
-  if (view.kind === "index") {
+  if (kind === "index") {
     return (
       <div className="present">
         <div className="card">
@@ -68,7 +72,7 @@ export default function Present({ items }) {
                 key={d.date}
                 type="button"
                 className="date-row"
-                onClick={() => setView({ kind: "date", date: d.date })}
+                onClick={() => navigate("explore", "date", d.date)}
               >
                 <span>{d.date}</span>
                 <span className="topic-count">{d.items.length}</span>
@@ -81,15 +85,15 @@ export default function Present({ items }) {
   }
 
   // ── Topic / person page ──────────────────────────────────────────────────────
-  if (view.kind === "topic") {
-    const bucket = topics.find((t) => t.name === view.name);
+  if (kind === "topic") {
+    const bucket = topics.find((t) => t.name === value);
     return (
       <div className="present">
-        <button className="crumb" onClick={() => setView({ kind: "index" })}>
+        <button className="crumb" onClick={goIndex}>
           ← All pages
         </button>
         <div className="card">
-          <h2 className="page-title">{view.name}</h2>
+          <h2 className="page-title">{value}</h2>
           <p className="muted">
             {bucket?.items.length ?? 0} observation
             {(bucket?.items.length ?? 0) === 1 ? "" : "s"}, most recent first.
@@ -105,15 +109,15 @@ export default function Present({ items }) {
   }
 
   // ── Date page ────────────────────────────────────────────────────────────────
-  if (view.kind === "date") {
-    const bucket = dates.find((d) => d.date === view.date);
+  if (kind === "date") {
+    const bucket = dates.find((d) => d.date === value);
     return (
       <div className="present">
-        <button className="crumb" onClick={() => setView({ kind: "index" })}>
+        <button className="crumb" onClick={goIndex}>
           ← All pages
         </button>
         <div className="card">
-          <h2 className="page-title">{view.date}</h2>
+          <h2 className="page-title">{value}</h2>
           <p className="muted">Everything that happened on this day.</p>
           <div className="obs-rows">
             {bucket?.items.map((item) => (
@@ -126,11 +130,11 @@ export default function Present({ items }) {
   }
 
   // ── One-node brain map ───────────────────────────────────────────────────────
-  const node = nodeView(items, view.id);
+  const node = nodeView(items, value);
   if (!node) {
     return (
       <div className="present">
-        <button className="crumb" onClick={() => setView({ kind: "index" })}>
+        <button className="crumb" onClick={goIndex}>
           ← All pages
         </button>
         <p className="empty">That observation is no longer in your Pod.</p>
@@ -140,7 +144,7 @@ export default function Present({ items }) {
 
   return (
     <div className="present">
-      <button className="crumb" onClick={() => setView({ kind: "index" })}>
+      <button className="crumb" onClick={goIndex}>
         ← All pages
       </button>
 

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { buildWikiIndex, buildArticle } from "../lib/wiki.js";
 import { llmAvailable, llmProviderLabel, generateArticleSummary } from "../lib/llm.js";
+import { useRoute } from "../lib/router.js";
 import WikiList from "./WikiList.jsx";
 
 // Wiki surface — the reading experience. A home that indexes generated articles,
@@ -129,14 +130,19 @@ function Article({ article, onOpen, onHome, onGenerate, generating, genError }) 
 }
 
 export default function Wiki({ items, onDelete }) {
-  const [view, setView] = useState({ kind: "home" });
+  const { segments, navigate } = useRoute();
   const [filter, setFilter] = useState("");
   const [summaries, setSummaries] = useState({}); // topic name → AI summary
   const [generating, setGenerating] = useState(null); // topic name being generated
   const [errors, setErrors] = useState({});
   const index = useMemo(() => buildWikiIndex(items), [items]);
 
-  const open = (name) => setView({ kind: "article", name });
+  // View derived from the hash: #/wiki (home), #/wiki/nodes, #/wiki/article/<name>.
+  const sub = segments[1];
+  const articleName = sub === "article" ? segments[2] : null;
+
+  const open = (name) => navigate("wiki", "article", name);
+  const goHome = () => navigate("wiki");
 
   async function handleGenerate(article) {
     const name = article.title;
@@ -162,25 +168,25 @@ export default function Wiki({ items, onDelete }) {
     );
   }
 
-  if (view.kind === "article") {
-    const article = buildArticle(items, view.name);
-    article.llm = summaries[view.name] || null;
+  if (articleName) {
+    const article = buildArticle(items, articleName);
+    article.llm = summaries[articleName] || null;
     return (
       <Article
         article={article}
         onOpen={open}
-        onHome={() => setView({ kind: "home" })}
+        onHome={goHome}
         onGenerate={handleGenerate}
-        generating={generating === view.name}
-        genError={errors[view.name]}
+        generating={generating === articleName}
+        genError={errors[articleName]}
       />
     );
   }
 
-  if (view.kind === "nodes") {
+  if (sub === "nodes") {
     return (
       <div className="wiki">
-        <button className="crumb" onClick={() => setView({ kind: "home" })}>
+        <button className="crumb" onClick={goHome}>
           ← Wiki home
         </button>
         <h2 className="page-title">All observations</h2>
@@ -208,7 +214,7 @@ export default function Wiki({ items, onDelete }) {
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
         />
-        <button className="ghost-button" onClick={() => setView({ kind: "nodes" })}>
+        <button className="ghost-button" onClick={() => navigate("wiki", "nodes")}>
           Browse all observations →
         </button>
       </div>
