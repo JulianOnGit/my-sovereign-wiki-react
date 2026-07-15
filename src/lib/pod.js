@@ -15,12 +15,14 @@ import {
   getStringNoLocale,
   getStringNoLocaleAll,
   getDatetime,
+  getInteger,
   getThing,
   getThingAll,
   getUrl,
   getUrlAll,
   addStringNoLocale,
   addDatetime,
+  addInteger,
   addUrl,
   buildThing,
   setThing,
@@ -37,6 +39,7 @@ import { POD_APP_DIR } from "../constants.js";
 const RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type";
 const DCTERMS_TITLE = "http://purl.org/dc/terms/title";
 const DCTERMS_CREATED = "http://purl.org/dc/terms/created";
+const DCTERMS_MODIFIED = "http://purl.org/dc/terms/modified";
 const SCHEMA_TEXT = "http://schema.org/text";
 const SCHEMA_URL = "http://schema.org/url";
 const SCHEMA_KEYWORDS = "http://schema.org/keywords";
@@ -61,6 +64,7 @@ const SSW_EFFLORESCENCE_TYPE = `${SSW}efflorescenceType`;
 const SSW_LENS = `${SSW}lens`;
 const SSW_SENSITIVITY = `${SSW}sensitivity`;
 const SSW_AUDIENCE = `${SSW}audience`;
+const SSW_REVISION = `${SSW}revision`;
 
 /// rdf:type marking a Thing as one of our wiki items (used to filter the index).
 const WIKI_ITEM_CLASS = "http://schema.org/CreativeWork";
@@ -156,6 +160,8 @@ function thingToItem(thing) {
     audience: getStringNoLocale(thing, SSW_AUDIENCE) ?? "",
     attributedTo: getStringNoLocale(thing, PROV_ATTRIBUTED_TO) ?? "user",
     createdAt: getDatetime(thing, DCTERMS_CREATED) ?? new Date(0),
+    modifiedAt: getDatetime(thing, DCTERMS_MODIFIED) ?? null,
+    revision: getInteger(thing, SSW_REVISION) ?? 1,
   };
 }
 
@@ -172,6 +178,18 @@ export function readItems(dataset) {
 /// upload target for media attachments.
 export function wikiContainerUrl(dataset) {
   return getSourceUrl(dataset).replace(/[^/]*$/, "");
+}
+
+/// Where this data physically lives — surfaced in the UI so the "one custody,
+/// inspectable linked data" promise of the Store stage is tangible, not implied.
+export function getStorageInfo(dataset) {
+  const indexUrl = getSourceUrl(dataset);
+  return {
+    indexUrl,
+    container: indexUrl.replace(/[^/]*$/, ""),
+    provider: new URL(indexUrl).origin,
+    format: "text/turtle (RDF)",
+  };
 }
 
 /// Upload one picked file into the wiki container and return its Pod URL. Best
@@ -208,12 +226,15 @@ export async function addItem(session, dataset, fields) {
     audience,
   } = fields;
   const indexUrl = getSourceUrl(dataset);
+  const now = new Date();
 
   let builder = buildThing(createThing({ name: `item-${Date.now()}` }))
     .addUrl(RDF_TYPE, WIKI_ITEM_CLASS)
     .addStringNoLocale(SCHEMA_TEXT, body ?? "")
     .addStringNoLocale(SCHEMA_ADDITIONAL_TYPE, type)
-    .addDatetime(DCTERMS_CREATED, new Date())
+    .addDatetime(DCTERMS_CREATED, now)
+    .addDatetime(DCTERMS_MODIFIED, now)
+    .addInteger(SSW_REVISION, 1)
     .addStringNoLocale(PROV_ATTRIBUTED_TO, "user");
 
   // Optional single-value string fields — written only when non-empty.

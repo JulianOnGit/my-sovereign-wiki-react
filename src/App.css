@@ -595,6 +595,34 @@ header > div {
   padding: 2rem 1rem;
 }
 
+/* Store footer — one custody, inspectable linked data */
+.store-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--muted);
+  flex-wrap: wrap;
+}
+
+.store-dot {
+  color: #34c759;
+  font-size: 0.7rem;
+}
+
+.store-provider {
+  color: var(--text);
+}
+
+.store-link {
+  margin-left: auto;
+  color: var(--accent);
+  text-decoration: none;
+}
+
 /* Ask */
 .ask-form {
   display: flex;

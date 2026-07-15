@@ -11,6 +11,7 @@ import {
   deleteItem,
   wikiContainerUrl,
   uploadAttachment,
+  getStorageInfo,
 } from "./lib/pod.js";
 
 const TABS = ["Capture", "Wiki", "Ask your Pod"];
@@ -139,6 +140,28 @@ export default function App() {
         {tab === "Wiki" && <WikiList items={items} onDelete={handleDelete} />}
         {tab === "Ask your Pod" && <AskPod items={items} />}
       </main>
+
+      {dataset && <StoreFooter dataset={dataset} count={items.length} />}
     </div>
+  );
+}
+
+// Store stage made tangible: a persistent line showing that everything lives in
+// one custody as inspectable linked data, with a direct link to the raw Turtle.
+function StoreFooter({ dataset, count }) {
+  const store = getStorageInfo(dataset);
+  return (
+    <footer className="store-footer">
+      <span className="store-dot" aria-hidden="true">
+        ●
+      </span>
+      <span>
+        {count} item{count === 1 ? "" : "s"} stored as {store.format} in your Pod at{" "}
+        <span className="store-provider">{store.provider}</span>
+      </span>
+      <a href={store.indexUrl} target="_blank" rel="noreferrer" className="store-link">
+        Inspect raw data
+      </a>
+    </footer>
   );
 }
