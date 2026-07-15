@@ -33,6 +33,7 @@ import {
   removeThing,
   saveSolidDatasetAt,
   saveFileInContainer,
+  universalAccess,
   asUrl,
 } from "@inrupt/solid-client";
 
@@ -329,4 +330,45 @@ export async function applyOrganise(session, dataset, plan) {
   }
 
   return await saveSolidDatasetAt(indexUrl, ds, { fetch: session.fetch });
+}
+
+// ── Share & Govern: fine-grained access (ACP/WAC via universal access) ─────────
+// These operate on real Solid access controls. They are intentionally thin and
+// throw on failure so the UI can report the *actual* server response — sharing
+// only means something if the grant genuinely landed on the Pod.
+
+/// Access purposes, expressed in plain words, mapped to concrete access modes.
+export const ACCESS_PURPOSES = {
+  view: { label: "View", modes: { read: true } },
+  comment: { label: "View & comment", modes: { read: true, append: true } },
+  edit: { label: "View & edit", modes: { read: true, append: true, write: true } },
+};
+
+/// Grant an agent (by WebID) access to a resource for a chosen purpose.
+export async function grantAccess(session, resourceUrl, webId, purpose) {
+  const spec = ACCESS_PURPOSES[purpose] ?? ACCESS_PURPOSES.view;
+  return universalAccess.setAgentAccess(resourceUrl, webId, spec.modes, {
+    fetch: session.fetch,
+  });
+}
+
+/// Every agent's access to a resource: `{ [webId]: { read, append, write, … } }`.
+/// Returns `{}` when the server reports no per-agent grants.
+export async function listAgentAccess(session, resourceUrl) {
+  return (await universalAccess.getAgentAccessAll(resourceUrl, { fetch: session.fetch })) ?? {};
+}
+
+/// Public (everyone) access to a resource, or null if unavailable.
+export async function getPublicAccess(session, resourceUrl) {
+  return universalAccess.getPublicAccess(resourceUrl, { fetch: session.fetch });
+}
+
+/// Revoke all of an agent's access to a resource.
+export async function revokeAccess(session, resourceUrl, webId) {
+  return universalAccess.setAgentAccess(
+    resourceUrl,
+    webId,
+    { read: false, append: false, write: false, controlRead: false, controlWrite: false },
+    { fetch: session.fetch },
+  );
 }
