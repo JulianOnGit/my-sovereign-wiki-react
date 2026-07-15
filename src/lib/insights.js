@@ -122,6 +122,8 @@ export function deriveInsights(items) {
       return {
         lens: b.lens,
         journey: b.journey,
+        observationLabel: b.observation,
+        analysisLabel: b.analysis,
         efflorescenceLabel: b.efflorescence,
         icon: b.icon,
         count: b.items.length,

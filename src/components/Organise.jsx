@@ -248,15 +248,15 @@ function StreamCard({ s }) {
         <div className="arc-row">
           <dt>Observation</dt>
           <dd>
-            {s.count} seen through the {s.lens.toLowerCase()} lens
+            {s.count} {s.observationLabel}{s.count === 1 ? "" : "s"}
           </dd>
         </div>
         <div className="arc-row">
           <dt>Analysis</dt>
           <dd>
             {s.efflorescenceCount > 0
-              ? `${s.efflorescenceCount} bore ${s.efflorescenceLabel}`
-              : `a stream forming — no ${s.efflorescenceLabel} yet`}
+              ? `${s.analysisLabel} drew out ${s.efflorescenceCount} ${s.efflorescenceLabel}`
+              : `${s.analysisLabel} under way — no ${s.efflorescenceLabel} yet`}
           </dd>
         </div>
         {topEff.length > 0 && (
