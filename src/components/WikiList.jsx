@@ -91,13 +91,15 @@ export default function WikiList({ items, onDelete }) {
                 <span className="badge badge-observation">observation</span>
               )}
               {heading ? <h3>{heading}</h3> : <span className="head-spacer" />}
-              <button
-                className="delete"
-                title="Delete from Pod"
-                onClick={() => onDelete(item.id)}
-              >
-                ×
-              </button>
+              {onDelete && (
+                <button
+                  className="delete"
+                  title="Delete from Pod"
+                  onClick={() => onDelete(item.id)}
+                >
+                  ×
+                </button>
+              )}
             </div>
 
             {item.body && (

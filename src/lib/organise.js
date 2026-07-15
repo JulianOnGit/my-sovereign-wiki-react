@@ -165,6 +165,36 @@ export function search(items, query, { topN = 5, threshold = 0.02 } = {}) {
     .slice(0, topN);
 }
 
+// A small spread across the corpus — evenly spaced rather than the first N, so a
+// representative sample shows the wiki's range instead of one cluster.
+function spread(items, n) {
+  if (items.length <= n) return items.slice();
+  const step = items.length / n;
+  return Array.from({ length: n }, (_, i) => items[Math.floor(i * step)]);
+}
+
+// The closest observations to a query even when none clear the relevance bar.
+// This keeps "Ask" useful on a miss: rather than a dead end, the caller (and the
+// user's own AI) still has real Pod material to reason over. Ranks by score; when
+// the query shares no vocabulary with the corpus at all — every score zero — it
+// falls back to a representative sample so there is always something real on hand.
+export function nearest(items, query, { topN = 5 } = {}) {
+  if (!items.length) return [];
+  const qTokens = tokenize(query);
+  const { docVecs, vecOf } = buildSearchIndex(items);
+  const qVec = vecOf(qTokens);
+  const qSet = new Set(qTokens);
+  const ranked = docVecs
+    .map((d) => ({
+      item: d.item,
+      score: cosine(qVec, d.vec),
+      matched: [...qSet].filter((t) => d.tokenSet.has(t)),
+    }))
+    .sort((a, b) => b.score - a.score);
+  if (ranked[0] && ranked[0].score > 0) return ranked.slice(0, topN);
+  return spread(items, topN).map((item) => ({ item, score: 0, matched: [] }));
+}
+
 // Full grounded answer: ranked citations plus graph-expanded connected items,
 // with copy that stays honest when the Pod contains no match.
 export function retrieve(items, query, { topN = 5 } = {}) {
@@ -173,18 +203,26 @@ export function retrieve(items, query, { topN = 5 } = {}) {
       answer: "Type a question or a few keywords to search your knowledge graph.",
       citations: [],
       connected: [],
+      fallback: [],
     };
   }
 
   const hits = search(items, query, { topN });
   if (!hits.length) {
+    // Nothing cleared the relevance bar. Rather than a dead end, surface the
+    // closest real material the Pod holds so the answer can stay grounded in the
+    // user's own notes — honest that none matched exactly, never a guess.
+    const fallback = nearest(items, query, { topN });
     return {
-      answer:
-        "Nothing in your Pod matches that yet. Your knowledge graph only contains " +
-        'what you have captured — so the honest answer is "I don\'t know from your ' +
-        'data" rather than a guess.',
+      answer: fallback.length
+        ? "Nothing in your Pod matches that directly yet — your knowledge graph only " +
+          "holds what you've captured. Here is the closest it contains, so the answer " +
+          "stays grounded in your own notes rather than a guess:"
+        : "Nothing in your Pod matches that yet, and there's nothing captured to draw " +
+          "on. Capture an observation and it becomes answerable here.",
       citations: [],
       connected: [],
+      fallback,
     };
   }
 
@@ -220,7 +258,7 @@ export function retrieve(items, query, { topN = 5 } = {}) {
   }
   answer += "\n\nEvery item cited is a real resource in your own Pod.";
 
-  return { answer, citations: hits, connected };
+  return { answer, citations: hits, connected, fallback: [] };
 }
 
 // Run the whole organise pass and return a per-item plan plus a summary the UI

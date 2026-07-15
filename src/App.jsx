@@ -22,6 +22,9 @@ import {
   getStorageInfo,
 } from "./lib/pod.js";
 import { useRoute } from "./lib/router.js";
+import { findArticle } from "./lib/wikiArticles.js";
+
+const APP_NAME = "My Sovereign Wiki";
 
 // Each tab has a URL-hash slug so it can live in browser history.
 const TABS = [
@@ -44,6 +47,22 @@ export default function App() {
   // The active tab is derived from the URL hash, so browser back/forward and
   // deep links "just work". Defaults to Capture when the hash is empty.
   const tab = SLUG_TO_TAB[segments[0]] ?? "Capture";
+
+  // Keep the browser/document title in step with what's on screen: the signed-out
+  // landing, the active tab, or — when reading a specific wiki article — that
+  // article's own title, so history entries and bookmarks read meaningfully.
+  useEffect(() => {
+    let context = null;
+    if (loggedIn) {
+      if (tab === "Wiki" && segments[1] === "article" && segments[2]) {
+        const curated = findArticle(segments[2]);
+        context = curated ? curated.title : segments[2];
+      } else {
+        context = tab;
+      }
+    }
+    document.title = context ? `${context} · ${APP_NAME}` : APP_NAME;
+  }, [loggedIn, tab, segments.join("/")]);
 
   const [dataset, setDataset] = useState(null);
   const [items, setItems] = useState([]);
@@ -203,7 +222,9 @@ export default function App() {
             {tab === "Explore" && <Present items={items} />}
             {tab === "Ask your Wiki" && <AskPod items={items} />}
             {tab === "Reflect" && <Reflect items={items} />}
-            {tab === "Share" && dataset && <Share session={session} dataset={dataset} />}
+            {tab === "Share" && dataset && (
+              <Share session={session} dataset={dataset} items={items} />
+            )}
             {tab === "Govern" && dataset && (
               <Govern session={session} dataset={dataset} items={items} />
             )}

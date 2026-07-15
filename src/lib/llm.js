@@ -164,14 +164,11 @@ const ASK_SYSTEM =
   "plainly (e.g. \"Your notes don't cover that yet\") instead of guessing. Be concise " +
   "and plain: two to five sentences, no preamble, no headings.";
 
-/// Grounded RAG synthesis (Retrieve stage). Given the ranked citations the local
-/// index already retrieved, the user's own AI writes a natural-language answer
-/// that may draw ONLY on those notes and must cite them by their 1-based number,
-/// so every claim traces back to a real resource in the Pod. Retrieval stays
-/// local (provenance); the model only composes over what was already grounded.
-export async function answerFromSources({ query, sources }) {
-  const lines = [`Question: ${query}`, "", "Notes (your own observations):"];
-  sources.forEach((s, i) => {
+// Render the retrieved notes as the numbered, bracket-cited block both Ask
+// prompts share, so [1]/[2] in the model's answer line up with the sources the
+// UI lists below it.
+function numberedSources(sources) {
+  return sources.map((s, i) => {
     const it = s.item;
     const head = it.title || (it.body || "").trim().split("\n")[0] || "(observation)";
     const detail = [it.body, it.interpretation, it.context]
@@ -180,7 +177,48 @@ export async function answerFromSources({ query, sources }) {
       .replace(/\s+/g, " ")
       .trim()
       .slice(0, 400);
-    lines.push(`[${i + 1}] ${head}${detail && detail !== head ? ` — ${detail}` : ""}`);
+    return `[${i + 1}] ${head}${detail && detail !== head ? ` — ${detail}` : ""}`;
   });
+}
+
+/// Grounded RAG synthesis (Retrieve stage). Given the ranked citations the local
+/// index already retrieved, the user's own AI writes a natural-language answer
+/// that may draw ONLY on those notes and must cite them by their 1-based number,
+/// so every claim traces back to a real resource in the Pod. Retrieval stays
+/// local (provenance); the model only composes over what was already grounded.
+export async function answerFromSources({ query, sources }) {
+  const lines = [
+    `Question: ${query}`,
+    "",
+    "Notes (your own observations):",
+    ...numberedSources(sources),
+  ];
   return runLLM({ system: ASK_SYSTEM, prompt: lines.join("\n"), maxTokens: 400 });
+}
+
+const ASK_NO_MATCH_SYSTEM =
+  "You are the retrieval assistant for a person's private knowledge wiki. Their " +
+  "question found NO direct match in their notes. Use no outside knowledge and invent " +
+  "nothing — no facts, names, dates, or numbers that are not in the notes below. Using " +
+  "ONLY the numbered notes below — the closest things their Pod actually contains — " +
+  "write a brief, genuinely helpful reply that: (1) says plainly their notes don't " +
+  "directly cover the question; and (2) points them to what their wiki DOES hold that " +
+  "is nearest or related, citing those notes inline with bracketed numbers like [1] " +
+  "or [2]. If even these notes are unrelated to the question, say so honestly and " +
+  "suggest capturing an observation on the topic. Be concise and plain: two to four " +
+  "sentences, no preamble, no headings.";
+
+/// Grounded reply for a retrieval miss. When the local index finds nothing above
+/// the relevance bar, the user's own AI still composes a sensible, honest answer
+/// over the CLOSEST notes the Pod holds — admitting nothing matched exactly and
+/// pointing at what the wiki does contain, cited by number. Same sovereign
+/// contract as answerFromSources: only the provided notes, nothing invented.
+export async function answerWhenNoMatch({ query, sources }) {
+  const lines = [
+    `Question (no direct match found): ${query}`,
+    "",
+    "Closest notes your Pod does contain (your own observations):",
+    ...numberedSources(sources),
+  ];
+  return runLLM({ system: ASK_NO_MATCH_SYSTEM, prompt: lines.join("\n"), maxTokens: 400 });
 }

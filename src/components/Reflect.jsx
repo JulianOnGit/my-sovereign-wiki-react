@@ -8,6 +8,7 @@ import {
   QUADRANTS,
   matrixPosition,
 } from "../lib/eudaimonia.js";
+import { DEMO_ITEMS, DEMO_STORY } from "../lib/demoData.js";
 
 // Reflect — a plain-language mirror of what you've been capturing. It reads
 // back your own notes and draws out the patterns: what you've been focused on
@@ -26,16 +27,30 @@ function jitter(id) {
 }
 
 export default function Reflect({ items }) {
-  const model = useMemo(() => analyseEcosystem(items), [items]);
+  // Example mode: default on when there's nothing of the user's own to reflect,
+  // so Reflect is never a dead end — it opens on a whole example life instead of
+  // an empty page. Users with data can toggle it to preview the vision. Mirrors
+  // Explore and Ask, and reads back the *same* person's notes those pages use.
+  const [demo, setDemo] = useState(items.length === 0);
+  const data = demo ? DEMO_ITEMS : items;
+  const model = useMemo(() => analyseEcosystem(data), [data]);
   const [hover, setHover] = useState(null);
 
-  if (items.length === 0) {
+  // Only reachable when a user with no notes turns the example off.
+  if (data.length === 0) {
     return (
-      <p className="empty">
-        Reflect grows out of what you capture. Jot down a few things you’ve
-        noticed, thought about, or want to do — then come back here to see the
-        bigger picture and what might be worth doing next.
-      </p>
+      <div className="journey">
+        <div className="demo-banner demo-banner-plain">
+          <span>
+            Reflect grows out of what you capture. Jot down a few things you’ve
+            noticed, thought about, or want to do — then come back to see the
+            bigger picture and what might be worth doing next.
+          </span>
+          <button className="demo-toggle" onClick={() => setDemo(true)}>
+            ✨ See an example
+          </button>
+        </div>
+      </div>
     );
   }
 
@@ -43,6 +58,51 @@ export default function Reflect({ items }) {
 
   return (
     <div className="journey">
+      {/* Example banner + toggle (mirrors Explore / Ask). */}
+      {demo ? (
+        <div className="demo-banner">
+          <span>
+            ✨ <strong>Example life.</strong> These are one person’s captured
+            notes, read back to show what Reflect can surface.
+            {items.length > 0 && " Your own reflection is hidden while this is on."}
+          </span>
+          {items.length > 0 && (
+            <button className="demo-toggle" onClick={() => setDemo(false)}>
+              Show my reflection
+            </button>
+          )}
+        </div>
+      ) : (
+        <div className="demo-banner demo-banner-plain">
+          <span>Everything below is read from your own captured notes.</span>
+          <button className="demo-toggle" onClick={() => setDemo(true)}>
+            ✨ See an example
+          </button>
+        </div>
+      )}
+
+      {/* Who this example is, and what Reflect drew out for them. */}
+      {demo && (
+        <div className="card trails-intro">
+          <h2 className="section-heading">Whose notes are these?</h2>
+          <p className="muted">{DEMO_STORY.intro}</p>
+          <div className="story-gains">
+            {DEMO_STORY.gains.map((g) => (
+              <div key={g.journeys[0]} className="story-gain">
+                <div className="aspect-chips">
+                  {g.journeys.map((j) => (
+                    <span key={j} className="aspect-chip">
+                      {j}
+                    </span>
+                  ))}
+                </div>
+                <p className="story-gain-text">{g.surfaced}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* What this is / how to use it */}
       <div className="card">
         <h2 className="section-heading">Reflect</h2>

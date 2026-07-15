@@ -74,6 +74,20 @@ export default function Govern({ session, dataset, items }) {
     }
   }
 
+  async function revokeOne(id) {
+    setBusy(true);
+    setStatus(null);
+    try {
+      await revokeAccess(session, store.indexUrl, id);
+      setStatus({ kind: "ok", text: `Revoked access for ${shortWebId(id)}.` });
+      await load();
+    } catch (e) {
+      setStatus({ kind: "error", text: `Revoke failed: ${e.message}` });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   // Client-side export — portability made real. The raw Turtle in the Pod is the
   // canonical portable form (linked below); this is a convenience snapshot.
   function exportData() {
@@ -106,10 +120,45 @@ export default function Govern({ session, dataset, items }) {
     URL.revokeObjectURL(url);
   }
 
+  const publicOpen = publicAccess && (publicAccess.read || publicAccess.write);
+  // "Who can reach your wiki": you + the local AI, plus anyone external and the
+  // public if it's open. Only meaningful once the audit has come back.
+  const accessCount = grants === null ? null : 2 + others.length + (publicOpen ? 1 : 0);
+
   return (
     <div className="govern">
-      <div className="card">
-        <h2 className="section-heading">Sovereignty</h2>
+      {/* Hero — Govern is the payoff of the whole app: proof that this is yours. */}
+      <div className="card govern-hero">
+        <span className="govern-hero-badge">Your sovereignty</span>
+        <h2 className="govern-hero-title">This is yours — and here’s the proof.</h2>
+        <p className="muted">
+          Everything you’ve captured lives in your Pod, under your own WebID, as
+          standard Turtle you can pick up and carry anywhere. This page is the
+          receipt: exactly who can reach your wiki, which AI you’ve chosen, and
+          one-click ways to take it all with you. Nothing here locks you in.
+        </p>
+
+        <div className="stat-row govern-stats">
+          <div className="stat">
+            <span className="stat-n tone-accent">{items.length}</span>
+            <span className="stat-label">observations in your Pod</span>
+          </div>
+          <div className="stat">
+            <span className="stat-n tone-accent">{accessCount ?? "—"}</span>
+            <span className="stat-label">people &amp; agents with access</span>
+          </div>
+          <div className="stat">
+            <span className={`stat-n ${others.length ? "tone-warn" : "tone-good"}`}>
+              {grants === null ? "—" : others.length}
+            </span>
+            <span className="stat-label">external parties</span>
+          </div>
+          <div className="stat">
+            <span className="stat-n tone-good">Turtle</span>
+            <span className="stat-label">open, portable format</span>
+          </div>
+        </div>
+
         <dl className="govern-facts">
           <div>
             <dt>Identity (WebID)</dt>
@@ -127,51 +176,63 @@ export default function Govern({ session, dataset, items }) {
               </a>
             </dd>
           </div>
-          <div>
-            <dt>Observations</dt>
-            <dd>{items.length}</dd>
-          </div>
         </dl>
       </div>
 
       <AiProviderCard />
 
       <div className="card">
-        <h3 className="section-heading">Access audit</h3>
+        <div className="govern-card-head">
+          <h3 className="section-heading">Who can reach your wiki</h3>
+          {accessCount !== null && (
+            <span className={`access-count ${others.length || publicOpen ? "is-shared" : "is-private"}`}>
+              {others.length || publicOpen ? `${accessCount} with access` : "private to you"}
+            </span>
+          )}
+        </div>
+        <p className="muted">
+          Read straight from your Pod’s access controls — not a cache, the real
+          thing. Revoke anyone the moment you change your mind.
+        </p>
         {grants === null ? (
           <p className="muted">Auditing access from your Pod…</p>
         ) : (
-          <>
-            <div className="grant-row grant-self">
-              <span className="grant-who">You (owner)</span>
-              <span className="grant-modes">full control</span>
-            </div>
-            <div className="grant-row">
-              <span className="grant-who">🤖 Sovereign AI (local)</span>
-              <span className="grant-modes">
-                runs on this device via your session — no separate credential
-              </span>
-            </div>
-            {publicAccess && (publicAccess.read || publicAccess.write) && (
-              <div className="grant-row">
-                <span className="grant-who">🌐 Everyone (public)</span>
-                <span className="grant-modes">{accessLabel(publicAccess)}</span>
-              </div>
+          <div className="grant-list">
+            <GrantRow tone="owner" icon="👤" who="You" sub="owner" modes="full control" />
+            <GrantRow
+              tone="ai"
+              icon="🤖"
+              who="Sovereign AI"
+              sub="runs on this device via your session — no separate credential"
+              modes="local only"
+            />
+            {publicOpen && (
+              <GrantRow
+                tone="public"
+                icon="🌐"
+                who="Everyone (public)"
+                sub="anyone with the link can reach this"
+                modes={accessLabel(publicAccess)}
+              />
             )}
             {others.map(([id, access]) => (
-              <div key={id} className="grant-row">
-                <span className="grant-who" title={id}>
-                  {shortWebId(id)}
-                </span>
-                <span className="grant-modes">{accessLabel(access)}</span>
-              </div>
+              <GrantRow
+                key={id}
+                tone="external"
+                icon="🔗"
+                who={shortWebId(id)}
+                title={id}
+                modes={accessLabel(access)}
+                onRevoke={() => revokeOne(id)}
+                busy={busy}
+              />
             ))}
-            {others.length > 0 && (
+            {others.length > 1 && (
               <button className="revoke revoke-all" onClick={revokeAll} disabled={busy}>
                 {busy ? "Revoking…" : "Revoke all external access"}
               </button>
             )}
-          </>
+          </div>
         )}
         {status && (
           <p className={status.kind === "error" ? "error-text" : "ok-text"}>{status.text}</p>
@@ -179,12 +240,17 @@ export default function Govern({ session, dataset, items }) {
       </div>
 
       <div className="card">
-        <h3 className="section-heading">Portability</h3>
+        <h3 className="section-heading">Take it with you</h3>
         <p className="muted">
           Nothing here locks you in. Your data is standard Turtle you can take to
           any Solid provider, the AI is local and swappable, and your identity is
           your own WebID.
         </p>
+        <div className="portability-points">
+          <span className="portability-point">📦 Standard Turtle — no proprietary schema</span>
+          <span className="portability-point">🔁 Swap providers without losing a thing</span>
+          <span className="portability-point">🆔 Your WebID, not our account</span>
+        </div>
         <div className="govern-actions">
           <button className="save" onClick={exportData} disabled={items.length === 0}>
             Export all observations (JSON)
@@ -197,6 +263,31 @@ export default function Govern({ session, dataset, items }) {
           </button>
         </div>
       </div>
+    </div>
+  );
+}
+
+// One row in the access audit: an avatar, who they are and what they can do, and
+// an inline revoke for anyone external. Tone colours the avatar so the owner,
+// the local AI, the public, and outsiders are distinguishable at a glance.
+function GrantRow({ tone, icon, who, sub, modes, title, onRevoke, busy }) {
+  return (
+    <div className={`grant grant-${tone}`}>
+      <span className="grant-avatar" aria-hidden="true">
+        {icon}
+      </span>
+      <div className="grant-body">
+        <span className="grant-name" title={title}>
+          {who}
+        </span>
+        {sub && <span className="grant-sub">{sub}</span>}
+      </div>
+      <span className="grant-badge">{modes}</span>
+      {onRevoke && (
+        <button className="revoke" onClick={onRevoke} disabled={busy}>
+          Revoke
+        </button>
+      )}
     </div>
   );
 }
@@ -221,9 +312,22 @@ function AiProviderCard() {
     setSaved(false);
   }
 
+  const activeLabel =
+    initial.provider === "anthropic"
+      ? "Claude (Anthropic)"
+      : initial.provider === "openai"
+        ? "OpenAI"
+        : "Local engine only";
+
   return (
     <div className="card">
-      <h3 className="section-heading">Your AI provider</h3>
+      <div className="govern-card-head">
+        <h3 className="section-heading">Your AI provider</h3>
+        <span className={`ai-status ${initial.provider === "none" ? "is-local" : "is-connected"}`}>
+          {initial.provider === "none" ? "🔒 " : "✨ "}
+          {activeLabel}
+        </span>
+      </div>
       <p className="muted">
         The wiki and journey work entirely on a local, transparent engine — no key
         needed. Optionally connect your own Claude or OpenAI key to have an AI

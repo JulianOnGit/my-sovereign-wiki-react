@@ -2,11 +2,17 @@ import { useMemo, useState } from "react";
 import { buildWikiIndex, buildArticle } from "../lib/wiki.js";
 import { llmAvailable, llmProviderLabel, generateArticleSummary } from "../lib/llm.js";
 import { useRoute } from "../lib/router.js";
+import WikiCurated from "./WikiCurated.jsx";
 import WikiList from "./WikiList.jsx";
 
 // Wiki surface — the reading experience. A home that indexes generated articles,
 // article pages assembled live from the observations, wikilinks between them,
 // and the raw captured nodes folded in as the "source" layer.
+//
+// Before the user has captured anything of their own, the tab shows a curated
+// demonstration wiki (see WikiCurated) — a well-kept encyclopedia of articles so
+// the reading experience is compelling on first open. The instant a real
+// observation exists, this live, derived-from-your-graph view takes over.
 
 const headline = (item) =>
   item.title || (item.body || "").trim().split("\n")[0].slice(0, 80) || "(observation)";
@@ -135,6 +141,11 @@ export default function Wiki({ items, onDelete }) {
   const [summaries, setSummaries] = useState({}); // topic name → AI summary
   const [generating, setGenerating] = useState(null); // topic name being generated
   const [errors, setErrors] = useState({});
+  // Example mode: the curated demonstration encyclopedia. Default on when the
+  // user has nothing of their own yet, and available any time via the toggle
+  // (mirrors Explore / Reflect / Ask).
+  const [demo, setDemo] = useState(items.length === 0);
+
   const index = useMemo(() => buildWikiIndex(items), [items]);
 
   // View derived from the hash: #/wiki (home), #/wiki/nodes, #/wiki/article/<name>.
@@ -143,6 +154,40 @@ export default function Wiki({ items, onDelete }) {
 
   const open = (name) => navigate("wiki", "article", name);
   const goHome = () => navigate("wiki");
+
+  // Toggling the example resets the route so a demo article slug can't linger in
+  // the hash when we switch back to the real (derived) wiki, and vice versa.
+  const setDemoMode = (on) => {
+    setDemo(on);
+    navigate("wiki");
+  };
+
+  // Banner shown while the curated example is on: offers to return to the user's
+  // own wiki when they have one.
+  const exampleBanner = (
+    <div className="demo-banner">
+      <span>
+        ✨ <strong>Example wiki.</strong> A curated encyclopedia of one person’s
+        captures, shown to demonstrate how your own wiki reads once it’s alive.
+        {items.length > 0 && " Your own wiki is hidden while this is on."}
+      </span>
+      {items.length > 0 && (
+        <button className="demo-toggle" onClick={() => setDemoMode(false)}>
+          Show my wiki
+        </button>
+      )}
+    </div>
+  );
+
+  // Banner shown on the real wiki: offers to preview the curated example.
+  const seeExampleBanner = (
+    <div className="demo-banner demo-banner-plain">
+      <span>Everything here is generated live from your own captured notes.</span>
+      <button className="demo-toggle" onClick={() => setDemoMode(true)}>
+        ✨ See an example
+      </button>
+    </div>
+  );
 
   async function handleGenerate(article) {
     const name = article.title;
@@ -158,13 +203,21 @@ export default function Wiki({ items, onDelete }) {
     }
   }
 
+  if (demo) {
+    return <WikiCurated banner={exampleBanner} />;
+  }
+
+  // Real wiki, but the user has turned the example off with nothing captured yet.
   if (items.length === 0) {
     return (
-      <p className="empty">
-        Your wiki writes itself from what you capture. Add a few observations and
-        run Organise — articles assemble themselves from the topics and people that
-        appear.
-      </p>
+      <div className="wiki">
+        {seeExampleBanner}
+        <p className="empty">
+          Your wiki writes itself from what you capture. Add a few observations and
+          run Organise — articles assemble themselves from the topics and people
+          that appear.
+        </p>
+      </div>
     );
   }
 
@@ -172,20 +225,24 @@ export default function Wiki({ items, onDelete }) {
     const article = buildArticle(items, articleName);
     article.llm = summaries[articleName] || null;
     return (
-      <Article
-        article={article}
-        onOpen={open}
-        onHome={goHome}
-        onGenerate={handleGenerate}
-        generating={generating === articleName}
-        genError={errors[articleName]}
-      />
+      <>
+        {seeExampleBanner}
+        <Article
+          article={article}
+          onOpen={open}
+          onHome={goHome}
+          onGenerate={handleGenerate}
+          generating={generating === articleName}
+          genError={errors[articleName]}
+        />
+      </>
     );
   }
 
   if (sub === "nodes") {
     return (
       <div className="wiki">
+        {seeExampleBanner}
         <button className="crumb" onClick={goHome}>
           ← Wiki home
         </button>
@@ -201,6 +258,7 @@ export default function Wiki({ items, onDelete }) {
 
   return (
     <div className="wiki">
+      {seeExampleBanner}
       <div className="card wiki-hero">
         <h2 className="page-title">Your wiki</h2>
         <p className="muted">
