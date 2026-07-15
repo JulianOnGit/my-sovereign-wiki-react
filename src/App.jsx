@@ -4,7 +4,7 @@ import LoginForm from "./components/LoginForm.jsx";
 import BrandMark from "./components/BrandMark.jsx";
 import SolidStatus from "./components/SolidStatus.jsx";
 import Capture from "./components/Capture.jsx";
-import WikiList from "./components/WikiList.jsx";
+import Wiki from "./components/Wiki.jsx";
 import AskPod from "./components/AskPod.jsx";
 import Organise from "./components/Organise.jsx";
 import Present from "./components/Present.jsx";
@@ -181,7 +181,7 @@ export default function App() {
             {tab === "Capture" && (
               <Capture onAdd={handleAdd} onViewWiki={() => setTab("Wiki")} />
             )}
-            {tab === "Wiki" && <WikiList items={items} onDelete={handleDelete} />}
+            {tab === "Wiki" && <Wiki items={items} onDelete={handleDelete} />}
             {tab === "Organise" && <Organise items={items} onOrganise={handleOrganise} />}
             {tab === "Explore" && <Present items={items} />}
             {tab === "Ask your Pod" && <AskPod items={items} />}
