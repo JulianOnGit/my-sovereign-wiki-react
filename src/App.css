@@ -3219,3 +3219,91 @@ code {
 .organise-rerun {
   white-space: nowrap;
 }
+
+/* ── Explore · Epiphantic exploration chains ─────────────────────────────────
+   Problem-solving walks: a themed header, a problem→payoff frame, and each hop
+   tagged with the Epiphantic move it makes. Steps reuse the .trail-* styles. */
+.chain-card {
+  position: relative;
+}
+.chain-head {
+  margin-bottom: 0.55rem;
+}
+.chain-journey {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+}
+.chain-journey-icon {
+  font-size: 0.95rem;
+}
+.chain-frame {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 0.95rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+.chain-problem,
+.chain-payoff {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+.chain-frame-label {
+  display: block;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 0.15rem;
+}
+.chain-frame-label-problem {
+  color: var(--warn);
+}
+.chain-frame-label-payoff {
+  color: var(--good);
+}
+.chain-payoff {
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border);
+}
+.chain-step-top {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-bottom: 0.15rem;
+}
+.chain-phase {
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
+  border-radius: 999px;
+  padding: 0.08rem 0.5rem;
+  white-space: nowrap;
+}
+.is-turn .chain-phase {
+  color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 12%, transparent);
+  border-color: color-mix(in srgb, var(--warn) 30%, transparent);
+}
+.is-inspiration .chain-phase {
+  color: var(--good);
+  background: color-mix(in srgb, var(--good) 12%, transparent);
+  border-color: color-mix(in srgb, var(--good) 30%, transparent);
+}

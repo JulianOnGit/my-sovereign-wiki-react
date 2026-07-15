@@ -288,3 +288,58 @@ export const DEMO_TRAILS = [
     ],
   },
 ];
+
+// ── Exploration chains ────────────────────────────────────────────────────────
+// The same graph, walked as *problem-solving* rather than idle wandering. Each
+// chain is an Epiphantic-style arc — it turns a felt problem into an integrated
+// solution — themed to one of the user journeys and led with its payoff, so the
+// benefit is legible before you take a single step. Each hop carries an
+// Epiphantic `phase` (the move being made) alongside its narrative `role`, and
+// still resolves to a real, clickable observation in the graph above.
+
+export const EXPLORE_CHAINS = [
+  {
+    id: "chain-bridge",
+    journey: "Cultural appreciation → Creativity",
+    icon: "🏛️",
+    problem: "A curiosity with nowhere to land: whose marks are these, and why do they matter?",
+    payoff: "You end up with something to make — the district's forgotten makers, collected on one page.",
+    from: "Cultural appreciation",
+    to: "Creativity & mastery",
+    steps: [
+      { id: "demo-bridge-marks", phase: "Problem seed", role: "A mark you can't explain", connector: null },
+      { id: "demo-masons-history", phase: "Impasse mapped", role: "The makers are anonymous, unrecorded", connector: "followed the topic · stone" },
+      { id: "demo-luthier", phase: "Candidate component", role: "A component appears: craft lives in the hands", connector: "AI-linked · craft", turn: true },
+      { id: "demo-mark-specimen", phase: "Offered solution", role: "The resolution: preserve them, and make", connector: "followed the topic · craft" },
+    ],
+  },
+  {
+    id: "chain-creek",
+    journey: "World-risk awareness → Care",
+    icon: "🌊",
+    problem: "Fast water and little warning — and no one has worked out who is most exposed.",
+    payoff: "You end up with a safeguard that reaches the most vulnerable neighbour first, even in a blackout.",
+    from: "World-risk awareness",
+    to: "Care & stewardship",
+    steps: [
+      { id: "demo-creek-rose", phase: "Problem seed", role: "The fright: how fast it rose", connector: null },
+      { id: "demo-flood-zone", phase: "Impasse mapped", role: "The risk is real, and moving", connector: "same place · Miller's Creek" },
+      { id: "demo-neighbour", phase: "Target outcome", role: "What matters: reach the most exposed first", connector: "AI-linked · who's exposed", turn: true },
+      { id: "demo-phone-tree", phase: "Deployed resolution", role: "A low-tech phone tree that just works", connector: "followed the topic · community" },
+    ],
+  },
+  {
+    id: "chain-morning",
+    journey: "Calm & groundedness → Universal love",
+    icon: "☕",
+    problem: "The day's demands keep eroding your calm — and the small kindnesses that steady others go unthanked.",
+    payoff: "You end up protecting one grounding ritual, and returning a kindness you'd stopped seeing.",
+    from: "Calm & groundedness",
+    to: "Universal love",
+    steps: [
+      { id: "demo-morning-light", phase: "Problem seed", role: "The pull of the day's demands", connector: null },
+      { id: "demo-coffee-ritual", phase: "Component identified", role: "The hinge that protects the calm", connector: "same time of day · morning" },
+      { id: "demo-bus-driver", phase: "Offered solution", role: "Return the unthanked kindness", connector: "AI-linked · a shared kindness", turn: true },
+    ],
+  },
+];

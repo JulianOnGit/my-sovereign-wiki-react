@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { collectTopics, collectDates, nodeView } from "../lib/pages.js";
-import { DEMO_ITEMS, DEMO_BY_ID, DEMO_TRAILS } from "../lib/demoData.js";
+import { DEMO_ITEMS, DEMO_BY_ID, EXPLORE_CHAINS } from "../lib/demoData.js";
 import { useRoute } from "../lib/router.js";
 
 // Present/Compose stage — navigable, human pages generated live from the graph.
@@ -26,22 +26,33 @@ function ObservationRow({ item, onOpen }) {
   );
 }
 
-// One curiosity trail: the arc it travels, then each hop as a clickable node.
-function Trail({ trail, onOpen }) {
-  const steps = trail.steps
+// One exploration chain: an Epiphantic arc that turns a stated problem into an
+// integrated solution. It leads with the problem and its payoff (so the benefit
+// is legible before the first hop), then walks each phase as a clickable node —
+// every phase tagged with the Epiphantic move it makes.
+function Chain({ chain, onOpen }) {
+  const steps = chain.steps
     .map((s) => ({ ...s, item: DEMO_BY_ID.get(s.id) }))
     .filter((s) => s.item);
   return (
-    <div className="card trail-card">
-      <div className="trail-arc">
-        <span className="trail-lens">{trail.from}</span>
-        <span className="trail-arrow" aria-hidden="true">
-          ⟶
+    <div className="card chain-card">
+      <div className="chain-head">
+        <span className="chain-journey">
+          <span className="chain-journey-icon" aria-hidden="true">{chain.icon}</span>
+          {chain.journey}
         </span>
-        <span className="trail-lens trail-lens-to">{trail.to}</span>
       </div>
-      <h3 className="trail-title">{trail.title}</h3>
-      <p className="muted trail-hook">{trail.hook}</p>
+
+      <div className="chain-frame">
+        <p className="chain-problem">
+          <span className="chain-frame-label chain-frame-label-problem">The problem</span>
+          {chain.problem}
+        </p>
+        <p className="chain-payoff">
+          <span className="chain-frame-label chain-frame-label-payoff">What it gets you</span>
+          {chain.payoff}
+        </p>
+      </div>
 
       <ol className="trail-steps">
         {steps.map((step, i) => {
@@ -67,7 +78,10 @@ function Trail({ trail, onOpen }) {
                 className="trail-node"
                 onClick={() => onOpen(step.item.id)}
               >
-                <span className="trail-role">{step.role}</span>
+                <span className="chain-step-top">
+                  <span className="chain-phase">{step.phase}</span>
+                  <span className="trail-role">{step.role}</span>
+                </span>
                 <span className="trail-headline">{headline(step.item)}</span>
                 <span className="trail-snippet">{step.item.body.slice(0, 120)}…</span>
                 <span className="trail-lenses">
@@ -145,18 +159,20 @@ export default function Present({ items }) {
 
         {demo && (
           <div className="card trails-intro">
-            <h2 className="section-heading">Curiosity trails</h2>
+            <h2 className="section-heading">Exploration chains</h2>
             <p className="muted">
-              A trail is a path through connected observations — starting from an
-              idle spark of curiosity, following one link to the next, and arriving
-              somewhere you didn't set out for. Each one crosses from one part of
-              life into another. Click any step to walk the graph yourself.
+              A chain walks your graph as problem-solving, not idle wandering. Each
+              one starts from a real problem, then follows the Epiphantic arc —
+              mapping the impasse, finding a target, turning up a component, and
+              arriving at an integrated solution. Every chain is themed to a part
+              of life and leads with its payoff, so the benefit is clear before you
+              take a step. Click any node to walk it yourself.
             </p>
           </div>
         )}
 
-        {demo && DEMO_TRAILS.map((trail) => (
-          <Trail key={trail.id} trail={trail} onOpen={openNode} />
+        {demo && EXPLORE_CHAINS.map((chain) => (
+          <Chain key={chain.id} chain={chain} onOpen={openNode} />
         ))}
 
         <div className="card">
