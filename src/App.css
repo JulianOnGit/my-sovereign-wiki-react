@@ -1,0 +1,311 @@
+:root {
+  --accent: #007aff;
+  --bg: #f5f6f8;
+  --card: #ffffff;
+  --border: #e3e5e9;
+  --text: #1c1c1e;
+  --muted: #6b7280;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+button {
+  cursor: pointer;
+  font: inherit;
+}
+
+input,
+textarea {
+  font: inherit;
+}
+
+.center,
+.login {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.login h1 {
+  margin: 0;
+}
+
+.login .tagline {
+  color: var(--muted);
+  margin: 0 0 1rem;
+}
+
+.login form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: min(360px, 90vw);
+  text-align: left;
+}
+
+.login label {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.login input,
+.capture input,
+.capture textarea,
+.ask-form input {
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+}
+
+.login button,
+.capture button,
+.ask-form button {
+  padding: 0.65rem 1rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.login button:disabled {
+  opacity: 0.6;
+}
+
+.login .hint {
+  color: var(--muted);
+  font-size: 0.8rem;
+  max-width: 360px;
+}
+
+/* App shell */
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+}
+
+header > div {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.webid {
+  color: var(--muted);
+  font-size: 0.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 60vw;
+}
+
+.logout {
+  border: 1px solid var(--border);
+  background: var(--card);
+  border-radius: 8px;
+  padding: 0.4rem 0.8rem;
+}
+
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1rem;
+}
+
+.tabs button {
+  border: none;
+  background: none;
+  padding: 0.6rem 0.9rem;
+  color: var(--muted);
+  border-bottom: 2px solid transparent;
+}
+
+.tabs button.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+.status {
+  background: #fff8e1;
+  border: 1px solid #ffe08a;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+/* Capture */
+.capture {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.type-toggle {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.type-toggle label {
+  flex: 1;
+  text-align: center;
+  padding: 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--muted);
+}
+
+.type-toggle label.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.type-toggle input {
+  display: none;
+}
+
+/* Wiki list */
+.wiki-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.item-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.item-head h3 {
+  margin: 0;
+  flex: 1;
+  font-size: 1rem;
+}
+
+.badge {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  color: #fff;
+}
+
+.badge-note {
+  background: #34c759;
+}
+
+.badge-bookmark {
+  background: #ff9500;
+}
+
+.delete {
+  border: none;
+  background: none;
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--muted);
+}
+
+.link {
+  display: inline-block;
+  color: var(--accent);
+  font-size: 0.85rem;
+  margin: 0.35rem 0;
+  word-break: break-all;
+}
+
+.body {
+  margin: 0.35rem 0;
+  white-space: pre-wrap;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.4rem;
+}
+
+.tag {
+  background: #eef1f6;
+  color: #3a3f4a;
+  border-radius: 6px;
+  padding: 0.1rem 0.45rem;
+  font-size: 0.75rem;
+}
+
+.date {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.72rem;
+}
+
+.empty {
+  color: var(--muted);
+  text-align: center;
+  padding: 2rem 1rem;
+}
+
+/* Ask */
+.ask-form {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.ask-form input {
+  flex: 1;
+}
+
+.answer pre {
+  white-space: pre-wrap;
+  margin: 0;
+  font-family: inherit;
+}
+
+.citations {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.75rem;
+}
