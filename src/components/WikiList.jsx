@@ -97,6 +97,16 @@ export default function WikiList({ items, onDelete }) {
               </p>
             )}
 
+            {item.mentions.length > 0 && (
+              <div className="mentions">
+                {item.mentions.map((m) => (
+                  <span key={m} className="mention" title="AI-extracted entity">
+                    {m}
+                  </span>
+                ))}
+              </div>
+            )}
+
             <div className="meta">
               {item.lenses.map((lens) => (
                 <span key={lens} className="tag tag-lens">
@@ -108,6 +118,11 @@ export default function WikiList({ items, onDelete }) {
                   #{tag}
                 </span>
               ))}
+              {item.related.length > 0 && (
+                <span className="related-count" title="AI-linked related observations">
+                  🔗 {item.related.length} related
+                </span>
+              )}
               {item.encounterMode && ENCOUNTER_LABELS[item.encounterMode] && (
                 <span className="provenance">{ENCOUNTER_LABELS[item.encounterMode]}</span>
               )}

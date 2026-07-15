@@ -24,6 +24,10 @@ import {
   addDatetime,
   addInteger,
   addUrl,
+  setDatetime,
+  setInteger,
+  removeStringNoLocale,
+  removeUrl,
   buildThing,
   setThing,
   removeThing,
@@ -45,6 +49,7 @@ const SCHEMA_URL = "http://schema.org/url";
 const SCHEMA_KEYWORDS = "http://schema.org/keywords";
 const SCHEMA_ADDITIONAL_TYPE = "http://schema.org/additionalType";
 const SCHEMA_ASSOCIATED_MEDIA = "http://schema.org/associatedMedia";
+const SCHEMA_MENTIONS = "http://schema.org/mentions";
 const PROV_ATTRIBUTED_TO = "http://www.w3.org/ns/prov#wasAttributedTo";
 
 // App-local vocabulary for the enrichment fields the universal-observation
@@ -65,6 +70,8 @@ const SSW_LENS = `${SSW}lens`;
 const SSW_SENSITIVITY = `${SSW}sensitivity`;
 const SSW_AUDIENCE = `${SSW}audience`;
 const SSW_REVISION = `${SSW}revision`;
+// Derived by the Organise (AI) pass and written back into the Pod.
+const SSW_RELATED = `${SSW}relatedTo`;
 
 /// rdf:type marking a Thing as one of our wiki items (used to filter the index).
 const WIKI_ITEM_CLASS = "http://schema.org/CreativeWork";
@@ -162,6 +169,9 @@ function thingToItem(thing) {
     createdAt: getDatetime(thing, DCTERMS_CREATED) ?? new Date(0),
     modifiedAt: getDatetime(thing, DCTERMS_MODIFIED) ?? null,
     revision: getInteger(thing, SSW_REVISION) ?? 1,
+    // Derived by the Organise (AI) pass — stored as ordinary, auditable triples.
+    mentions: getStringNoLocaleAll(thing, SCHEMA_MENTIONS),
+    related: getUrlAll(thing, SSW_RELATED),
   };
 }
 
@@ -287,6 +297,38 @@ export async function deleteItem(session, dataset, itemId) {
   if (!thing) return dataset;
   const updated = removeThing(dataset, thing);
   return await saveSolidDatasetAt(indexUrl, updated, { fetch: session.fetch });
+}
+
+/// Write the Organise (AI) pass results back into the Pod as ordinary triples.
+/// `plan` is a Map of itemId → { mentions: string[], related: string[] }. Existing
+/// derived triples are cleared first so the pass is idempotent, and each touched
+/// item's revision is bumped and dcterms:modified refreshed — the derivation is
+/// itself provenance-tracked. Returns the updated dataset.
+export async function applyOrganise(session, dataset, plan) {
+  const indexUrl = getSourceUrl(dataset);
+  let ds = dataset;
+
+  for (const [itemId, { mentions, related }] of plan) {
+    let thing = getThing(ds, itemId);
+    if (!thing) continue;
+
+    // Clear previous derivations for a clean, idempotent rewrite.
+    for (const v of getStringNoLocaleAll(thing, SCHEMA_MENTIONS)) {
+      thing = removeStringNoLocale(thing, SCHEMA_MENTIONS, v);
+    }
+    for (const v of getUrlAll(thing, SSW_RELATED)) {
+      thing = removeUrl(thing, SSW_RELATED, v);
+    }
+
+    for (const m of mentions) if (m && m.trim()) thing = addStringNoLocale(thing, SCHEMA_MENTIONS, m.trim());
+    for (const r of related) if (r) thing = addUrl(thing, SSW_RELATED, r);
+
+    thing = setInteger(thing, SSW_REVISION, (getInteger(thing, SSW_REVISION) ?? 1) + 1);
+    thing = setDatetime(thing, DCTERMS_MODIFIED, new Date());
+    ds = setThing(ds, thing);
+  }
+
+  return await saveSolidDatasetAt(indexUrl, ds, { fetch: session.fetch });
 }
 
 /// Transparent keyword-overlap retrieval over the loaded items — the same

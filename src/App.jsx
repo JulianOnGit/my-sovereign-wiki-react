@@ -4,17 +4,19 @@ import LoginForm from "./components/LoginForm.jsx";
 import Capture from "./components/Capture.jsx";
 import WikiList from "./components/WikiList.jsx";
 import AskPod from "./components/AskPod.jsx";
+import Organise from "./components/Organise.jsx";
 import {
   getOrCreateWikiDataset,
   readItems,
   addItem,
   deleteItem,
+  applyOrganise,
   wikiContainerUrl,
   uploadAttachment,
   getStorageInfo,
 } from "./lib/pod.js";
 
-const TABS = ["Capture", "Wiki", "Ask your Pod"];
+const TABS = ["Capture", "Wiki", "Organise", "Ask your Pod"];
 
 export default function App() {
   const { session, sessionRequestInProgress } = useSession();
@@ -97,6 +99,15 @@ export default function App() {
     [session, dataset],
   );
 
+  const handleOrganise = useCallback(
+    async (plan) => {
+      const ds = await applyOrganise(session, dataset, plan);
+      setDataset(ds);
+      setItems(readItems(ds));
+    },
+    [session, dataset],
+  );
+
   if (sessionRequestInProgress) {
     return <div className="center">Connecting to your Pod…</div>;
   }
@@ -138,6 +149,7 @@ export default function App() {
           <Capture onAdd={handleAdd} onViewWiki={() => setTab("Wiki")} />
         )}
         {tab === "Wiki" && <WikiList items={items} onDelete={handleDelete} />}
+        {tab === "Organise" && <Organise items={items} onOrganise={handleOrganise} />}
         {tab === "Ask your Pod" && <AskPod items={items} />}
       </main>
 

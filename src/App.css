@@ -595,6 +595,104 @@ header > div {
   padding: 2rem 1rem;
 }
 
+/* Organise — sovereign AI pass */
+.organise {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.section-heading {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+}
+
+.organise .muted,
+.muted {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.organise code {
+  background: var(--bg);
+  border-radius: 4px;
+  padding: 0.05rem 0.3rem;
+  font-size: 0.82em;
+}
+
+.organise .save {
+  align-self: flex-start;
+  margin: 0.6rem 0;
+  padding: 0.55rem 1.1rem;
+  border: none;
+  border-radius: 8px;
+  background: var(--accent);
+  color: #fff;
+  font-weight: 600;
+}
+
+.organise .save:disabled {
+  opacity: 0.5;
+}
+
+.organise-summary {
+  background: #eef6ff;
+  border: 1px solid #cfe4ff;
+  border-radius: 8px;
+  padding: 0.6rem 0.8rem;
+  font-size: 0.9rem;
+}
+
+.error-text {
+  color: #d70015;
+  font-size: 0.88rem;
+}
+
+.entity-cloud {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.entity-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.2rem 0.5rem 0.2rem 0.7rem;
+  font-size: 0.82rem;
+}
+
+.entity-count {
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  padding: 0.02rem 0.4rem;
+}
+
+/* AI-derived links in the one-node view */
+.mentions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.5rem;
+}
+
+.mention {
+  font-size: 0.75rem;
+  color: var(--accent);
+  background: #eef6ff;
+  border-radius: 6px;
+  padding: 0.1rem 0.45rem;
+}
+
+.related-count {
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
 /* Store footer — one custody, inspectable linked data */
 .store-footer {
   display: flex;
