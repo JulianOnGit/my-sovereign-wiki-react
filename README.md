@@ -6,6 +6,24 @@ the JavaScript sibling of the Flutter app in
 [`@inrupt`](https://docs.inrupt.com/developer-tools/javascript/client-libraries/)
 Solid client libraries.
 
+## The value stream (all seven stages)
+
+Each tab is one stage of the sovereignty value stream, end to end:
+
+| Stage | Tab | What it delivers |
+| --- | --- | --- |
+| **Capture** | Capture | Universal observation composer — one custody for journaling, health, projects, study (capture-first, progressive disclosure). |
+| **Store** | (footer) | Inspectable Turtle (RDF) in your own Pod, with revision/provenance metadata and a raw-data link. |
+| **Organise** | Organise | Sovereign, **local** AI pass — TF-IDF related-entry links + entity extraction, written back as `schema:mentions` / `ssw:relatedTo` triples. No hosted LLM, no data leaves the device. |
+| **Retrieve** | Ask your Pod | Grounded vector RAG with cited provenance and graph expansion — every answer traces to a real Pod resource. |
+| **Present** | Explore | Pages as live views over the graph: topic/person/date pages and a one-node "brain map". Nothing is duplicated. |
+| **Share** | Share | Purpose-led, fine-grained access by WebID (ACP/WAC) — sharing without copying, revocable. |
+| **Govern** | Govern | Audit every grant (including the local AI), revoke all, export, and stay portable across providers. |
+
+The AI is deliberately a transparent local engine (`src/lib/organise.js`) so the
+"AI is sovereign" promise is literal; a stronger model can be swapped in behind
+the same interface without moving where trust sits.
+
 Structure and CRUD flow follow the freeCodeCamp tutorial
 [*Create a Solid To-Do App With React*](https://www.freecodecamp.org/news/create-a-solid-to-do-app-with-react/)
 (`@inrupt/solid-client` + `@inrupt/solid-ui-react`, `SessionProvider`,

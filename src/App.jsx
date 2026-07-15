@@ -7,6 +7,7 @@ import AskPod from "./components/AskPod.jsx";
 import Organise from "./components/Organise.jsx";
 import Present from "./components/Present.jsx";
 import Share from "./components/Share.jsx";
+import Govern from "./components/Govern.jsx";
 import {
   getOrCreateWikiDataset,
   readItems,
@@ -18,7 +19,7 @@ import {
   getStorageInfo,
 } from "./lib/pod.js";
 
-const TABS = ["Capture", "Wiki", "Organise", "Explore", "Ask your Pod", "Share"];
+const TABS = ["Capture", "Wiki", "Organise", "Explore", "Ask your Pod", "Share", "Govern"];
 
 export default function App() {
   const { session, sessionRequestInProgress } = useSession();
@@ -155,6 +156,9 @@ export default function App() {
         {tab === "Explore" && <Present items={items} />}
         {tab === "Ask your Pod" && <AskPod items={items} />}
         {tab === "Share" && dataset && <Share session={session} dataset={dataset} />}
+        {tab === "Govern" && dataset && (
+          <Govern session={session} dataset={dataset} items={items} />
+        )}
       </main>
 
       {dataset && <StoreFooter dataset={dataset} count={items.length} />}
