@@ -556,9 +556,81 @@ code {
   border-radius: 6px;
   padding: 0.1rem 0.5rem;
 }
-.related-count {
+.related-toggle {
   font-size: 0.72rem;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+  border-radius: 999px;
+  padding: 0.12rem 0.55rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.related-toggle:hover {
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+.related-caret {
+  font-size: 0.55rem;
+  opacity: 0.8;
+}
+.related-panel {
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px dashed var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.related-panel-head {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
   color: var(--muted);
+  margin-bottom: 0.15rem;
+}
+.related-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  text-align: left;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.45rem 0.6rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.related-item:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface-2));
+}
+.related-item-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.related-item-snippet {
+  font-size: 0.75rem;
+  color: var(--muted);
+  line-height: 1.4;
+}
+.observation-card {
+  scroll-margin-top: 1rem;
+}
+.observation-card.is-highlighted {
+  animation: obs-flash 1.8s ease-out;
+}
+@keyframes obs-flash {
+  0%,
+  30% {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
+  }
+  100% {
+    border-color: var(--border);
+    box-shadow: 0 0 0 0 transparent;
+  }
 }
 
 .meta {
