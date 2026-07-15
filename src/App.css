@@ -3773,3 +3773,167 @@ code {
 .proof-guarantee-actions {
   margin-top: 0.8rem;
 }
+
+/* ── Govern · move providers / host your own ─────────────────────────────────
+   Values-first Pod-provider comparison, and one-click sovereign/decentralised
+   self-hosting. */
+.provider-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+  gap: 0.7rem;
+  margin: 0.9rem 0 0.4rem;
+}
+.provider-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+}
+.provider-card.is-current {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.provider-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.provider-flag {
+  font-size: 1.05rem;
+}
+.provider-name {
+  font-weight: 650;
+  font-size: 0.9rem;
+  color: var(--text);
+  word-break: break-word;
+}
+.provider-current-pill {
+  margin-left: auto;
+  font-size: 0.6rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
+  white-space: nowrap;
+}
+.provider-tagline {
+  margin: 0;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.provider-attrs {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0;
+}
+.provider-attr {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  padding-top: 0.4rem;
+  border-top: 1px dashed var(--border);
+}
+.provider-attr dt {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+.provider-attr dd {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text);
+}
+.provider-btn {
+  margin-top: auto;
+  width: 100%;
+}
+.provider-note {
+  margin: 0.6rem 0 0.2rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-2));
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+}
+.provider-note p {
+  margin: 0 0 0.5rem;
+  font-size: 0.83rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+.provider-selfhost {
+  margin-top: 1.1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.cloud-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+  gap: 0.7rem;
+  margin-top: 0.8rem;
+}
+.cloud-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.cloud-card.is-highlight {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background:
+    radial-gradient(130% 120% at 100% 0%, color-mix(in srgb, var(--accent) 10%, transparent), transparent 60%),
+    var(--surface-2);
+}
+.cloud-card-head {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+.cloud-icon {
+  font-size: 1.1rem;
+}
+.cloud-name {
+  font-weight: 650;
+  font-size: 0.92rem;
+  color: var(--text);
+}
+.cloud-region {
+  margin-left: auto;
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.1rem 0.5rem;
+  white-space: nowrap;
+}
+.cloud-tagline {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--muted);
+  flex: 1;
+}
+.cloud-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.cloud-deploy {
+  flex: 1;
+  min-width: 8rem;
+}

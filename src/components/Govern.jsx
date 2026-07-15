@@ -265,6 +265,8 @@ export default function Govern({ session, dataset, items }) {
           </button>
         </div>
       </div>
+
+      <ProviderOptions store={store} onSwitch={() => session.logout()} />
     </div>
   );
 }
@@ -519,6 +521,234 @@ function ProofVantage({ store }) {
           </a>
         </div>
       </section>
+    </div>
+  );
+}
+
+// Pod providers you could move to. Your data is standard Turtle, so switching is
+// a copy, not a migration — which means the choice can be about values, not
+// lock-in: cost, the energy behind the servers, whose laws govern the data, and
+// how the people who run it are treated. Ratings are indicative, to make the
+// trade-offs legible rather than to score anyone precisely.
+const POD_PROVIDERS = [
+  {
+    id: "solidcommunity-au",
+    name: "pods.solidcommunity.au",
+    flag: "🇦🇺",
+    tagline: "The Australian Solid community server — where your wiki lives now.",
+    current: true,
+    cost: "Free · community-run",
+    environment: "AU data centres, renewable-backed",
+    sovereignty: "Australian jurisdiction 🇦🇺",
+    workers: "Community & academic, under AU law",
+  },
+  {
+    id: "self-host",
+    name: "Self-hosted (Community Solid Server)",
+    flag: "🔧",
+    tagline: "Run the open-source server yourself — the most sovereign option of all.",
+    cost: "Your hardware or VPS",
+    environment: "Your choice of power — go green",
+    sovereignty: "Absolute — you own the metal",
+    workers: "You (and anyone you invite)",
+  },
+  {
+    id: "datapod-eu",
+    name: "datapod · redpencil.io",
+    flag: "🇪🇺",
+    tagline: "A European worker co-operative running green Solid hosting.",
+    cost: "Free / pay-what-you-can",
+    environment: "Green EU hosting",
+    sovereignty: "EU jurisdiction, GDPR",
+    workers: "Worker-owned co-operative",
+  },
+  {
+    id: "inrupt",
+    name: "Inrupt PodSpaces",
+    flag: "🏢",
+    tagline: "Managed, commercial Pod hosting from the company behind Solid.",
+    cost: "Free tier · paid plans",
+    environment: "Hyperscale cloud (multi-region)",
+    sovereignty: "US company, region-selectable",
+    workers: "US corporate employment",
+  },
+  {
+    id: "solidcommunity-net",
+    name: "solidcommunity.net",
+    flag: "🌐",
+    tagline: "The original global community server — free and volunteer-run.",
+    cost: "Free · donations",
+    environment: "Volunteer infrastructure",
+    sovereignty: "Community, UK/global",
+    workers: "Volunteer maintainers",
+  },
+];
+
+const POD_ATTRS = [
+  { key: "cost", icon: "💰", label: "Cost" },
+  { key: "environment", icon: "🌱", label: "Environment" },
+  { key: "sovereignty", icon: "🏛️", label: "National sovereignty" },
+  { key: "workers", icon: "🤝", label: "Workers’ rights" },
+];
+
+// One-click places to stand up your own Solid server. Evernode leads for its
+// philosophical fit — decentralised, no single operator, ANU-born — followed by
+// Australia's sovereign secure clouds and an AI-model host, then a plain Docker
+// path anyone can run. Links go to the real providers; the "deploy" itself is a
+// prototype preview.
+const CLOUD_HOSTS = [
+  {
+    id: "evernode",
+    icon: "🕸️",
+    name: "Evernode",
+    region: "Decentralised network",
+    tagline:
+      "Host your Solid server on decentralised compute — no single operator can pull the plug. Born at the ANU, built on the XRP Ledger.",
+    url: "https://evernode.org",
+    highlight: true,
+  },
+  {
+    id: "aucloud",
+    icon: "🇦🇺",
+    name: "AUCloud",
+    region: "Australia · sovereign",
+    tagline: "Certified Australian sovereign cloud, built for government-grade workloads.",
+    url: "https://aucloud.com.au",
+  },
+  {
+    id: "vault",
+    icon: "🔐",
+    name: "Vault Cloud",
+    region: "Australia · secure",
+    tagline: "Australia's highest-certified sovereign cloud, up to PROTECTED classification.",
+    url: "https://vaultcloud.com.au",
+  },
+  {
+    id: "trellis",
+    icon: "🧠",
+    name: "Trellis Data",
+    region: "Australia · AI",
+    tagline: "Australian AI — host sovereign models right alongside your Pod.",
+    url: "https://www.trellisdata.com",
+  },
+  {
+    id: "docker",
+    icon: "🐳",
+    name: "One-click Docker",
+    region: "Anywhere you like",
+    tagline: "Run the open-source Community Solid Server in a container on any host — total control.",
+    url: "https://github.com/CommunitySolidServer/CommunitySolidServer",
+  },
+];
+
+// Move providers, or host it yourself — the practical face of "nothing locks you
+// in". A values-first comparison grid of Pod providers, and one-click ways to
+// stand up your own Solid server on sovereign or decentralised infrastructure.
+function ProviderOptions({ store, onSwitch }) {
+  const [note, setNote] = useState(null);
+
+  return (
+    <div className="card provider-options">
+      <h3 className="section-heading">Move providers, or host it yourself</h3>
+      <p className="muted">
+        Your wiki is standard Turtle, so moving it is a copy — not a migration. That
+        frees the choice of provider to be about your values: what it costs, the
+        energy behind the servers, whose laws govern your data, and how the people
+        who run it are treated.
+      </p>
+
+      {/* Pod provider comparison */}
+      <div className="provider-grid">
+        {POD_PROVIDERS.map((prov) => (
+          <div key={prov.id} className={`provider-card${prov.current ? " is-current" : ""}`}>
+            <div className="provider-card-head">
+              <span className="provider-flag" aria-hidden="true">{prov.flag}</span>
+              <span className="provider-name">{prov.name}</span>
+              {prov.current && <span className="provider-current-pill">You’re here</span>}
+            </div>
+            <p className="provider-tagline">{prov.tagline}</p>
+            <dl className="provider-attrs">
+              {POD_ATTRS.map((attr) => (
+                <div key={attr.key} className="provider-attr">
+                  <dt>
+                    <span aria-hidden="true">{attr.icon}</span> {attr.label}
+                  </dt>
+                  <dd>{prov[attr.key]}</dd>
+                </div>
+              ))}
+            </dl>
+            {prov.current ? (
+              <button className="ghost-button provider-btn" disabled>
+                Current provider
+              </button>
+            ) : (
+              <button
+                className="save provider-btn"
+                onClick={() => {
+                  setNote(
+                    `To move to ${prov.name}: create a Pod there, then sign in and import your ` +
+                      `Turtle export — everything comes across because it's an open format. ` +
+                      `Sign out here when you're ready to switch.`,
+                  );
+                }}
+              >
+                Move here →
+              </button>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {note && (
+        <div className="provider-note">
+          <p>{note}</p>
+          <button className="ghost-button" onClick={onSwitch}>
+            Sign out to switch
+          </button>
+        </div>
+      )}
+
+      {/* One-click self-host */}
+      <div className="provider-selfhost">
+        <div className="proof-pillar-head">
+          <span className="proof-pillar-icon" aria-hidden="true">🚀</span>
+          <h4 className="proof-pillar-title">Or host your own Solid server — one click</h4>
+          <span className="proof-pillar-sub">sovereign & decentralised infrastructure</span>
+        </div>
+        <p className="muted">
+          Prefer to own the whole stack? Stand up your Pod’s Solid server on
+          infrastructure that matches your principles — decentralised, or Australian
+          and sovereign.
+        </p>
+        <div className="cloud-grid">
+          {CLOUD_HOSTS.map((host) => (
+            <div key={host.id} className={`cloud-card${host.highlight ? " is-highlight" : ""}`}>
+              <div className="cloud-card-head">
+                <span className="cloud-icon" aria-hidden="true">{host.icon}</span>
+                <span className="cloud-name">{host.name}</span>
+                <span className="cloud-region">{host.region}</span>
+              </div>
+              <p className="cloud-tagline">{host.tagline}</p>
+              <div className="cloud-actions">
+                <button
+                  className="save cloud-deploy"
+                  onClick={() =>
+                    setNote(
+                      `One-click deploy to ${host.name} is a prototype preview. Follow "Learn more" ` +
+                        `to set it up today, then point your WebID at your new server.`,
+                    )
+                  }
+                >
+                  One-click deploy
+                </button>
+                <a className="ghost-button" href={host.url} target="_blank" rel="noreferrer">
+                  Learn more →
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
