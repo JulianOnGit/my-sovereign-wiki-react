@@ -3205,19 +3205,96 @@ code {
 .organise-step-detail {
   color: color-mix(in srgb, var(--good) 85%, var(--text));
 }
+/* The twelve-stage trace collapses to nothing once the run is done, animating
+   its own height with the grid-rows technique (transitions to `auto` don't) plus
+   a fade, so the card settles smoothly onto just the result. */
+.organise-collapsible {
+  display: grid;
+  grid-template-rows: 1fr;
+  transition: grid-template-rows 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.organise-collapsible[data-collapsed] {
+  grid-template-rows: 0fr;
+}
+.organise-collapsible-inner {
+  min-height: 0;
+  overflow: hidden;
+  transition: opacity 0.3s ease;
+}
+.organise-collapsible[data-collapsed] .organise-collapsible-inner {
+  opacity: 0;
+}
+
+/* The resulting artefact: the outcome summary, then a quiet actions row — a
+   disclosure to reopen the trace and the re-organise control. */
 .organise-done {
   margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  animation: ssw-done-in 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+.organise-done .organise-summary {
+  margin-top: 0;
+  background:
+    radial-gradient(120% 160% at 100% 0%, color-mix(in srgb, var(--good) 12%, transparent), transparent 60%),
+    color-mix(in srgb, var(--accent) 10%, transparent);
+}
+.organise-done .organise-summary strong {
+  color: var(--accent-strong);
+}
+.organise-done-actions {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 0.6rem;
 }
-.organise-done .organise-summary {
-  flex: 1 1 16rem;
-  margin-top: 0;
-}
 .organise-rerun {
   white-space: nowrap;
+  margin-left: auto;
+}
+.organise-steps-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 550;
+  color: var(--muted);
+  transition: color 0.2s ease;
+}
+.organise-steps-toggle:hover {
+  color: var(--accent);
+}
+.organise-steps-chev {
+  display: inline-block;
+  font-size: 0.7rem;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.organise-steps-toggle[aria-expanded="true"] .organise-steps-chev {
+  transform: rotate(90deg);
+}
+@keyframes ssw-done-in {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .organise-collapsible,
+  .organise-collapsible-inner,
+  .organise-steps-chev,
+  .organise-done {
+    transition: none;
+    animation: none;
+  }
 }
 
 /* ── Explore · Epiphantic exploration chains ─────────────────────────────────
@@ -3936,4 +4013,179 @@ code {
 .cloud-deploy {
   flex: 1;
   min-width: 8rem;
+}
+
+/* ── Share · the good-life architectural map ─────────────────────────────────
+   Five dimensions → capabilities → the access grants that keep each running.
+   Modelled on Reflect's "Areas of your life", extended with live consent. */
+.goodlife-spanning {
+  margin: 0.4rem 0 1rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px dashed color-mix(in srgb, var(--accent) 40%, var(--border));
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+.goodlife-spanning-head {
+  font-size: 0.74rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+}
+.goodlife-domains {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+.goodlife-domain {
+  --gl: var(--accent);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gl);
+  border-radius: 12px;
+  padding: 0.85rem 0.95rem;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--gl) 6%, transparent), transparent 40%),
+    var(--card);
+}
+.tone-gl-virtue { --gl: #8b5cf6; }
+.tone-gl-phronesis { --gl: #3b82f6; }
+.tone-gl-social { --gl: #14b8a6; }
+.tone-gl-material { --gl: #d99a2b; }
+.tone-gl-courage { --gl: #e0526a; }
+.goodlife-domain-head {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.7rem;
+}
+.goodlife-domain-icon {
+  display: grid;
+  place-items: center;
+  width: 2.1rem;
+  height: 2.1rem;
+  flex: none;
+  border-radius: 10px;
+  font-size: 1.1rem;
+  background: color-mix(in srgb, var(--gl) 16%, transparent);
+}
+.goodlife-domain-id {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  min-width: 0;
+  flex: 1;
+}
+.goodlife-domain-name {
+  font-weight: 700;
+  font-size: 0.98rem;
+  color: var(--text);
+}
+.goodlife-domain-blurb {
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.goodlife-domain-count {
+  flex: none;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--gl);
+  background: color-mix(in srgb, var(--gl) 14%, transparent);
+  border-radius: 999px;
+  padding: 0.12rem 0.55rem;
+  white-space: nowrap;
+}
+.goodlife-caps {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  gap: 0.6rem;
+}
+.goodlife-cap {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.6rem 0.7rem;
+  background: var(--surface-2);
+}
+.goodlife-cap.has-grants {
+  background: var(--card);
+  border-color: color-mix(in srgb, var(--gl) 30%, var(--border));
+}
+.goodlife-cap-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  margin-bottom: 0.45rem;
+}
+.goodlife-cap-name {
+  font-weight: 600;
+  font-size: 0.86rem;
+  color: var(--text);
+}
+.goodlife-cap-enables {
+  font-size: 0.74rem;
+  line-height: 1.35;
+  color: var(--muted);
+}
+.goodlife-cap-empty {
+  margin: 0;
+  font-size: 0.74rem;
+  color: var(--muted);
+  opacity: 0.75;
+  font-style: italic;
+}
+.goodlife-grants {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.goodlife-grant {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+}
+.goodlife-grant.status-expiring {
+  border-color: color-mix(in srgb, var(--warn) 40%, var(--border));
+}
+.goodlife-grant.status-expired {
+  opacity: 0.6;
+}
+.goodlife-grant-avatar {
+  font-size: 0.95rem;
+}
+.goodlife-grant-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.02rem;
+  min-width: 0;
+  flex: 1;
+}
+.goodlife-grant-who {
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.goodlife-grant-scope {
+  font-size: 0.7rem;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.goodlife-grant-access {
+  flex: none;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.goodlife-grant .revoke {
+  flex: none;
 }

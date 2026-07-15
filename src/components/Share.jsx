@@ -24,6 +24,7 @@ import {
   scopeIcon,
   scopeLabel,
 } from "../lib/shareDemo.js";
+import { mapGoodLife } from "../lib/goodLife.js";
 
 // Share stage — purpose-led, fine-grained consent.
 //
@@ -190,6 +191,8 @@ export default function Share({ session, dataset, items = [] }) {
           any grant at any time.
         </p>
       </div>
+
+      <GoodLifeMap shares={shares} onRevoke={handleRevokeShare} />
 
       <GrantComposer
         subjectKind={subjectKind} setSubjectKind={setSubjectKind}
@@ -464,6 +467,109 @@ function ShareCard({ grant, onRevoke }) {
           {grant.pending ? "Cancel invite" : "Revoke"}
         </button>
       </div>
+    </div>
+  );
+}
+
+// ── The architectural map: dimensions → capabilities → grants ─────────────────
+// A structural view of the same grants: the five dimensions of a good life, each
+// broken into the capabilities it's built from, each capability showing the
+// access grants that keep it functioning — controllable in place. Modelled on
+// "Areas of your life" in Reflect, extended so the good-life model and the
+// consent model are one picture.
+function GoodLifeMap({ shares, onRevoke }) {
+  const { domains, spanning } = useMemo(() => mapGoodLife(shares), [shares]);
+
+  return (
+    <div className="card goodlife">
+      <div className="share-list-head">
+        <h3 className="section-heading">The architecture of your good life</h3>
+        <span className="share-count-pill">{shares.length}</span>
+      </div>
+      <p className="muted">
+        The five dimensions of a good life, broken into the capabilities each is
+        built from. Many capabilities only work when someone else can reach part of
+        your wiki — so each one maintains its own access grants. Here's what's live
+        under every capability, and you can revoke any of it in place.
+      </p>
+
+      {spanning.length > 0 && (
+        <div className="goodlife-spanning">
+          <div className="goodlife-spanning-head">
+            <span aria-hidden="true">♾️</span> Reaching across every dimension
+          </div>
+          <div className="goodlife-grants">
+            {spanning.map((g) => (
+              <GrantMini key={g.id} grant={g} onRevoke={onRevoke} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <div className="goodlife-domains">
+        {domains.map((d) => (
+          <div key={d.key} className={`goodlife-domain tone-gl-${d.tone}`}>
+            <div className="goodlife-domain-head">
+              <span className="goodlife-domain-icon" aria-hidden="true">{d.icon}</span>
+              <div className="goodlife-domain-id">
+                <span className="goodlife-domain-name">{d.name}</span>
+                <span className="goodlife-domain-blurb">{d.blurb}</span>
+              </div>
+              <span className="goodlife-domain-count">
+                {d.grantCount} grant{d.grantCount === 1 ? "" : "s"}
+              </span>
+            </div>
+            <div className="goodlife-caps">
+              {d.capabilities.map((c) => (
+                <div key={c.key} className={"goodlife-cap" + (c.grants.length ? " has-grants" : "")}>
+                  <div className="goodlife-cap-head">
+                    <span className="goodlife-cap-name">{c.name}</span>
+                    <span className="goodlife-cap-enables">{c.enables}</span>
+                  </div>
+                  {c.grants.length ? (
+                    <div className="goodlife-grants">
+                      {c.grants.map((g) => (
+                        <GrantMini key={g.id} grant={g} onRevoke={onRevoke} />
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="goodlife-cap-empty">
+                      No grants keep this running — it stays entirely private.
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// One grant, rendered compactly inside a capability: who, the slice they reach,
+// what they can do, and an inline revoke.
+function GrantMini({ grant, onRevoke }) {
+  const subjectMeta = SUBJECT_KINDS[grant.subject.kind];
+  const access = ACCESS_LEVELS[grant.access];
+  const status = grantStatus(grant);
+  const who = grant.subject.kind === "public" ? "Everyone" : grant.subject.name;
+  return (
+    <div className={"goodlife-grant status-" + status}>
+      <span className="goodlife-grant-avatar" aria-hidden="true">{subjectMeta.icon}</span>
+      <div className="goodlife-grant-body">
+        <span className="goodlife-grant-who">{who}</span>
+        <span className="goodlife-grant-scope">
+          <span aria-hidden="true">{scopeIcon(grant.scope)}</span> {scopeLabel(grant.scope)}
+        </span>
+      </div>
+      <span className="goodlife-grant-access" title={access?.blurb}>
+        {access?.icon} {access?.label}
+      </span>
+      {grant.pending && <span className="pill pill-pending">Pending</span>}
+      <button className="revoke" onClick={() => onRevoke(grant)}>
+        Revoke
+      </button>
     </div>
   );
 }
