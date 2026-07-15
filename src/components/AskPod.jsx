@@ -23,7 +23,7 @@ export default function AskPod({ items }) {
       <form onSubmit={handleAsk} className="ask-form">
         <input
           type="text"
-          placeholder="Ask your Pod… e.g. what did Nora say about the dictionary?"
+          placeholder="Ask your Wiki… e.g. what have I written about my goals lately?"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />

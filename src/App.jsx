@@ -29,7 +29,7 @@ const TABS = [
   { label: "Wiki", slug: "wiki" },
   { label: "Organise", slug: "organise" },
   { label: "Explore", slug: "explore" },
-  { label: "Ask your Pod", slug: "ask" },
+  { label: "Ask your Wiki", slug: "ask" },
   { label: "Reflect", slug: "reflect" },
   { label: "Share", slug: "share" },
   { label: "Govern", slug: "govern" },
@@ -201,7 +201,7 @@ export default function App() {
             {tab === "Wiki" && <Wiki items={items} onDelete={handleDelete} />}
             {tab === "Organise" && <Organise items={items} onOrganise={handleOrganise} />}
             {tab === "Explore" && <Present items={items} />}
-            {tab === "Ask your Pod" && <AskPod items={items} />}
+            {tab === "Ask your Wiki" && <AskPod items={items} />}
             {tab === "Reflect" && <Reflect items={items} />}
             {tab === "Share" && dataset && <Share session={session} dataset={dataset} />}
             {tab === "Govern" && dataset && (
