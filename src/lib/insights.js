@@ -136,10 +136,15 @@ export function deriveInsights(items) {
     })
     .sort((a, b) => b.count - a.count || a.journey.localeCompare(b.journey));
 
-  // Corpus totals.
+  // Corpus totals. Entities are the named people/places/projects the agent lifts
+  // into schema:mentions triples; themes are the topical tags the observations
+  // carry, which make a far more legible conceptual index for browsing.
   const entityCounts = new Map();
-  for (const item of items)
+  const themeCounts = new Map();
+  for (const item of items) {
     for (const m of item.mentions || []) entityCounts.set(m, (entityCounts.get(m) || 0) + 1);
+    for (const t of item.tags || []) themeCounts.set(t, (themeCounts.get(t) || 0) + 1);
+  }
 
   const edges = new Set();
   for (const item of items)
@@ -187,9 +192,9 @@ export function deriveInsights(items) {
     }
   }
 
-  const topEntities = [...entityCounts.entries()]
+  const topThemes = [...themeCounts.entries()]
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .slice(0, 24);
 
-  return { totals, streams, bridges, topEntities };
+  return { totals, streams, bridges, topThemes };
 }

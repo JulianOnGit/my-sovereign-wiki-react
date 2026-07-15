@@ -6,7 +6,7 @@ import { DEMO_ITEMS } from "../lib/demoData.js";
 // How many items each detail list shows before a "show more" reveals the rest.
 const STREAM_LIMIT = 2;
 const BRIDGE_LIMIT = 3;
-const ENTITY_LIMIT = 12;
+const THEME_LIMIT = 12;
 
 // ── The organising sequence ───────────────────────────────────────────────────
 // An Epiphantic-style arc — the discipline of turning a tangle of problems into
@@ -152,7 +152,7 @@ export default function Organise({ items, onOrganise }) {
   // taste of every section without unrolling the whole corpus at once.
   const [showAllStreams, setShowAllStreams] = useState(false);
   const [showAllBridges, setShowAllBridges] = useState(false);
-  const [showAllEntities, setShowAllEntities] = useState(false);
+  const [showAllThemes, setShowAllThemes] = useState(false);
 
   const alreadyOrganised = items.filter(
     (i) => i.mentions.length || i.related.length,
@@ -167,7 +167,7 @@ export default function Organise({ items, onOrganise }) {
     return { insights: deriveInsights(DEMO_ITEMS), isExample: true };
   }, [items]);
 
-  const { totals, streams, bridges, topEntities } = insights;
+  const { totals, streams, bridges, topThemes } = insights;
 
   async function run() {
     if (running || items.length === 0) return;
@@ -328,26 +328,29 @@ export default function Organise({ items, onOrganise }) {
         </div>
       )}
 
-      {topEntities.length > 0 && (
+      {topThemes.length > 0 && (
         <div className="card">
-          <h3 className="section-heading">Entities the agent has surfaced</h3>
+          <h3 className="section-heading">Themes the agent has surfaced</h3>
+          <p className="muted">
+            The topics your observations keep returning to — a conceptual index of
+            the graph, drawn from the tags you captured.
+          </p>
           <div className="entity-cloud">
-            {(showAllEntities ? topEntities : topEntities.slice(0, ENTITY_LIMIT)).map(
-              ([entity, count]) => (
-                <span key={entity} className="entity-chip">
-                  {entity}
+            {(showAllThemes ? topThemes : topThemes.slice(0, THEME_LIMIT)).map(
+              ([theme, count]) => (
+                <span key={theme} className="entity-chip">
+                  {theme}
                   <span className="entity-count">{count}</span>
                 </span>
               ),
             )}
           </div>
           <ShowMore
-            count={topEntities.length}
-            limit={ENTITY_LIMIT}
-            expanded={showAllEntities}
-            onToggle={() => setShowAllEntities((v) => !v)}
-            noun="entity"
-            pluralNoun="entities"
+            count={topThemes.length}
+            limit={THEME_LIMIT}
+            expanded={showAllThemes}
+            onToggle={() => setShowAllThemes((v) => !v)}
+            noun="theme"
           />
         </div>
       )}
