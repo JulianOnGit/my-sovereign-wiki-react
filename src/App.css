@@ -4189,3 +4189,137 @@ code {
 .goodlife-grant .revoke {
   flex: none;
 }
+
+/* ── Share · access history & audit ──────────────────────────────────────────
+   The permission audit trail: filters, log export, panic revoke, and a timeline
+   of grants and real accesses — each access revocable in place. */
+.audit-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin: 0.9rem 0 0.4rem;
+}
+.audit-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.audit-filter {
+  font: inherit;
+  font-size: 0.76rem;
+  font-weight: 550;
+  color: var(--muted);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.22rem 0.7rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.audit-filter:hover {
+  border-color: color-mix(in srgb, var(--accent) 40%, var(--border));
+}
+.audit-filter.active {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.audit-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+.audit-feed {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+.audit-event {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  padding: 0.55rem 0;
+  position: relative;
+}
+/* Timeline rail between the dots. */
+.audit-event::before {
+  content: "";
+  position: absolute;
+  left: 0.92rem;
+  top: 2.1rem;
+  bottom: -0.1rem;
+  width: 2px;
+  background: var(--border);
+}
+.audit-event:last-child::before {
+  display: none;
+}
+.audit-dot {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 1.85rem;
+  height: 1.85rem;
+  flex: none;
+  border-radius: 50%;
+  font-size: 0.85rem;
+  background: var(--surface-2);
+  border: 1.5px solid var(--border);
+}
+.audit-dot.tone-accent {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.audit-dot.tone-good {
+  border-color: color-mix(in srgb, var(--good) 45%, var(--border));
+  background: color-mix(in srgb, var(--good) 12%, transparent);
+}
+.audit-dot.tone-warn {
+  border-color: color-mix(in srgb, var(--warn) 45%, var(--border));
+  background: color-mix(in srgb, var(--warn) 12%, transparent);
+}
+.audit-event-body {
+  flex: 1;
+  min-width: 0;
+  padding-top: 0.1rem;
+}
+.audit-event-top {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+.audit-event-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+}
+.audit-event-time {
+  margin-left: auto;
+  font-size: 0.72rem;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.audit-event-line {
+  margin: 0.15rem 0 0;
+  font-size: 0.88rem;
+  color: var(--text);
+}
+.audit-event-what {
+  color: var(--accent);
+}
+.audit-event-detail {
+  margin: 0.15rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.audit-event-revoke {
+  flex: none;
+  align-self: center;
+}

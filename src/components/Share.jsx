@@ -25,6 +25,7 @@ import {
   scopeLabel,
 } from "../lib/shareDemo.js";
 import { mapGoodLife } from "../lib/goodLife.js";
+import { buildAuditFeed, AUDIT_EVENT_TYPES, timeAgo } from "../lib/accessLog.js";
 
 // Share stage — purpose-led, fine-grained consent.
 //
@@ -169,6 +170,21 @@ export default function Share({ session, dataset, items = [] }) {
     });
   }
 
+  // Panic control — cut every external grant at once, keeping the local, on-device
+  // AI (it's you, running in your own session, not an outside party).
+  function handleRevokeAllExternal() {
+    setShares((prev) => {
+      const kept = prev.filter((g) => g.subject.kind === "agent");
+      const removed = prev.length - kept.length;
+      setNotice(
+        removed
+          ? { kind: "ok", text: `Revoked ${removed} external grant${removed === 1 ? "" : "s"}. Your wiki is private again.` }
+          : { kind: "ok", text: "No external grants to revoke." },
+      );
+      return kept;
+    });
+  }
+
   const orderedShares = useMemo(
     () =>
       [...shares].sort((a, b) => {
@@ -231,6 +247,12 @@ export default function Share({ session, dataset, items = [] }) {
           {orderedShares.length === 0 && <p className="muted">Not shared with anyone yet.</p>}
         </div>
       </div>
+
+      <AccessAudit
+        shares={shares}
+        onRevoke={handleRevokeShare}
+        onRevokeAllExternal={handleRevokeAllExternal}
+      />
 
       <EnforcedLayer session={session} resourceUrl={resourceUrl} store={store} />
     </div>
@@ -570,6 +592,116 @@ function GrantMini({ grant, onRevoke }) {
       <button className="revoke" onClick={() => onRevoke(grant)}>
         Revoke
       </button>
+    </div>
+  );
+}
+
+// ── Access history & audit ────────────────────────────────────────────────────
+// The permission audit trail: a chronological feed of grants made and — the part
+// that matters for an audit — times someone actually reached your data, with
+// controls to filter, export the log, revoke the grant behind any access, and cut
+// all external sharing at once.
+const AUDIT_FILTERS = [
+  { key: "all", label: "All activity", match: () => true },
+  { key: "accessed", label: "Actual accesses", match: (t) => ["accessed", "commented", "edited"].includes(t) },
+  { key: "granted", label: "Grants & invites", match: (t) => ["granted", "invited"].includes(t) },
+  { key: "revoked", label: "Revokes & expiries", match: (t) => ["revoked", "expiring"].includes(t) },
+];
+
+function AccessAudit({ shares, onRevoke, onRevokeAllExternal }) {
+  const [filter, setFilter] = useState("all");
+  const feed = useMemo(() => buildAuditFeed(shares), [shares]);
+  const shareById = useMemo(() => new Map(shares.map((g) => [g.id, g])), [shares]);
+
+  const active = AUDIT_FILTERS.find((f) => f.key === filter) ?? AUDIT_FILTERS[0];
+  const shown = feed.filter((e) => active.match(e.type));
+  const accessCount = feed.filter((e) => ["accessed", "commented", "edited"].includes(e.type)).length;
+
+  function exportLog() {
+    const rows = feed.map((e) => ({
+      at: e.at instanceof Date ? e.at.toISOString() : null,
+      event: AUDIT_EVENT_TYPES[e.type]?.label ?? e.type,
+      who: e.who,
+      what: e.what,
+      detail: e.detail,
+    }));
+    const blob = new Blob([JSON.stringify(rows, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "my-sovereign-wiki-access-audit.json";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <div className="card access-audit">
+      <div className="share-list-head">
+        <h3 className="section-heading">Access history &amp; audit</h3>
+        <span className="share-count-pill">{accessCount} accesses</span>
+      </div>
+      <p className="muted">
+        Every grant you make, and every time someone — or the local AI — actually
+        reaches a slice of your wiki. This is your permission audit trail: filter it,
+        export it, revoke the grant behind any access, or cut all external sharing at
+        once.
+      </p>
+
+      {/* Controls */}
+      <div className="audit-controls">
+        <div className="audit-filters">
+          {AUDIT_FILTERS.map((f) => (
+            <button
+              key={f.key}
+              type="button"
+              className={"audit-filter" + (filter === f.key ? " active" : "")}
+              onClick={() => setFilter(f.key)}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+        <div className="audit-actions">
+          <button type="button" className="ghost-button" onClick={exportLog}>
+            Export audit log
+          </button>
+          <button type="button" className="revoke revoke-all" onClick={onRevokeAllExternal}>
+            Revoke all external
+          </button>
+        </div>
+      </div>
+
+      {/* Timeline */}
+      <ol className="audit-feed">
+        {shown.map((e) => {
+          const meta = AUDIT_EVENT_TYPES[e.type] ?? { icon: "•", label: e.type, tone: "muted" };
+          const grant = e.grantId ? shareById.get(e.grantId) : null;
+          return (
+            <li key={e.id} className="audit-event">
+              <span className={`audit-dot tone-${meta.tone}`} aria-hidden="true">
+                {meta.icon}
+              </span>
+              <div className="audit-event-body">
+                <div className="audit-event-top">
+                  <span className="audit-event-label">{meta.label}</span>
+                  <span className="audit-event-time">{timeAgo(e.at)}</span>
+                </div>
+                <p className="audit-event-line">
+                  <strong>{e.who}</strong>
+                  {e.what ? <> · <span className="audit-event-what">{e.what}</span></> : null}
+                </p>
+                {e.detail && <p className="audit-event-detail">{e.detail}</p>}
+              </div>
+              {grant && (
+                <button className="revoke audit-event-revoke" onClick={() => onRevoke(grant)}>
+                  Revoke
+                </button>
+              )}
+            </li>
+          );
+        })}
+        {shown.length === 0 && <li className="muted">No activity of this kind yet.</li>}
+      </ol>
     </div>
   );
 }
