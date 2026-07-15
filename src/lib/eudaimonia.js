@@ -20,8 +20,8 @@ export const CAPABILITIES = [
   },
   {
     key: "phronesis",
-    name: "Making good decisions",
-    blurb: "Good judgement in context: reflection, foresight, prioritisation, learning.",
+    name: "Doing meaningful work",
+    blurb: "Meaningful, worthwhile work — reflection, foresight, prioritisation, learning.",
     aspects: ["judgement", "reflection", "foresight", "prioritisation", "learning", "insight", "mastery"],
   },
   {
@@ -38,8 +38,8 @@ export const CAPABILITIES = [
   },
   {
     key: "courage",
-    name: "Doing the right thing",
-    blurb: "Doing the hard right thing: integrity, boundaries, standing for values.",
+    name: "Feeling well-supported",
+    blurb: "Feeling able to do what feels right to you, however you express it — integrity, boundaries, standing for your values.",
     aspects: ["integrity", "speaking up", "boundaries", "standing for values", "difficult action", "stewardship"],
   },
 ];
@@ -49,7 +49,7 @@ export const STAGES = [
   { key: "order", name: "Getting organised", blurb: "Bringing in structure — routines, systems, a manageable day-to-day." },
   { key: "identity", name: "Knowing yourself", blurb: "Getting clear on who you are — your values, purpose, and what feels authentic." },
   { key: "better", name: "Living and working", blurb: "Growing on purpose — goals, skills, projects, and steady progress." },
-  { key: "makariotic", name: "A flourishing life", blurb: "Really thriving — meaning, joy, gratitude, love, and giving back." },
+  { key: "makariotic", name: "Flourishing", blurb: "Really thriving — meaning, joy, gratitude, love, and giving back." },
 ];
 
 export const stageIndex = (key) => STAGES.findIndex((s) => s.key === key);
