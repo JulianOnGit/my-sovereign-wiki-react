@@ -3029,3 +3029,193 @@ code {
     font-size: 1.6rem;
   }
 }
+
+/* ── Organise · the sovereign AI at work ─────────────────────────────────────
+   A live Epiphantic run: a progress rail and a twelve-stage stepper that
+   narrates itself as the agent reasons over your wiki. */
+@keyframes ssw-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes ssw-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.organise-spinner {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border: 2px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: ssw-spin 0.7s linear infinite;
+}
+.organise-run {
+  margin-top: 0.9rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+  border-radius: 14px;
+  padding: 1rem 1.05rem 1.1rem;
+  background:
+    radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--accent) 9%, transparent), transparent 55%),
+    var(--surface-2);
+}
+.organise-run-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.organise-run-title {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+}
+.organise-run-badge {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  flex: none;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+  color: var(--accent);
+  font-size: 1rem;
+  font-weight: 700;
+}
+.organise-run-name {
+  font-weight: 650;
+  color: var(--text);
+  font-size: 0.98rem;
+}
+.organise-run-caption {
+  font-size: 0.82rem;
+  color: var(--muted);
+  margin-top: 0.1rem;
+}
+.organise-run-count {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--accent);
+  white-space: nowrap;
+}
+.organise-run-count span {
+  color: var(--muted);
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+.organise-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 14%, var(--border));
+  overflow: hidden;
+  margin: 0.85rem 0 0.35rem;
+}
+.organise-progress-bar {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-strong));
+  transition: width 0.42s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.organise-steps {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+}
+.organise-step {
+  display: flex;
+  gap: 0.7rem;
+  padding: 0.42rem 0;
+  position: relative;
+}
+/* Connecting rail between the stage markers. */
+.organise-step::before {
+  content: "";
+  position: absolute;
+  left: 0.87rem;
+  top: 1.9rem;
+  bottom: -0.2rem;
+  width: 2px;
+  background: var(--border);
+}
+.organise-step:last-child::before {
+  display: none;
+}
+.organise-step-marker {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  flex: none;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  border: 1.5px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  transition: all 0.3s ease;
+}
+.organise-step.is-todo {
+  opacity: 0.55;
+}
+.organise-step.is-active .organise-step-marker {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+.organise-step.is-done .organise-step-marker {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: #fff;
+}
+.organise-step-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  padding-top: 0.15rem;
+}
+.organise-step-title {
+  font-size: 0.9rem;
+  font-weight: 550;
+  color: var(--text);
+}
+.organise-step.is-active .organise-step-title {
+  color: var(--accent);
+}
+.organise-step-line,
+.organise-step-detail {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  animation: ssw-step-in 0.35s ease both;
+}
+.organise-step-line {
+  color: var(--muted);
+}
+.organise-step-detail {
+  color: color-mix(in srgb, var(--good) 85%, var(--text));
+}
+.organise-done {
+  margin-top: 0.9rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+.organise-done .organise-summary {
+  flex: 1 1 16rem;
+  margin-top: 0;
+}
+.organise-rerun {
+  white-space: nowrap;
+}
