@@ -32,7 +32,7 @@ export default function AskPod({ items }) {
             <div className="citations">
               {result.citations.map((c) => (
                 <span key={c.id} className="tag">
-                  {c.title}
+                  {c.title || c.body.trim().split("\n")[0].slice(0, 48) || "(observation)"}
                 </span>
               ))}
             </div>

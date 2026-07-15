@@ -63,24 +63,30 @@ textarea {
 }
 
 .login input,
-.capture input,
-.capture textarea,
+.composer input,
+.composer textarea,
 .ask-form input {
   padding: 0.6rem 0.75rem;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--card);
+  color: var(--text);
 }
 
 .login button,
-.capture button,
+.composer .save,
 .ask-form button {
-  padding: 0.65rem 1rem;
+  padding: 0.65rem 1.1rem;
   border: none;
   border-radius: 8px;
   background: var(--accent);
   color: #fff;
   font-weight: 600;
+}
+
+.composer .save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .login button:disabled {
@@ -167,35 +173,279 @@ header > div {
   padding: 1rem;
 }
 
-/* Capture */
-.capture {
+/* Capture — capture-first composer */
+.composer {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 0.75rem;
 }
 
-.type-toggle {
+.composer-label {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.composer .observation {
+  resize: vertical;
+  min-height: 6.5rem;
+  line-height: 1.45;
+}
+
+.composer .observation::placeholder {
+  color: var(--muted);
+}
+
+/* Media & voice tools */
+.capture-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.tool {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.85rem;
+}
+
+.tool.listening {
+  border-color: #ff3b30;
+  color: #ff3b30;
+  font-weight: 600;
+}
+
+.link-draft {
   display: flex;
   gap: 0.5rem;
 }
 
-.type-toggle label {
+.link-draft input {
+  flex: 1;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--text);
+}
+
+.attachments {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.attachment {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--bg);
+}
+
+.attachment-thumb {
+  width: 34px;
+  height: 34px;
+  object-fit: cover;
+  border-radius: 6px;
+}
+
+.attachment-icon {
+  font-size: 1.1rem;
+}
+
+.attachment-name {
+  flex: 1;
+  font-size: 0.85rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.attachment-remove {
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+/* Progressive-disclosure sections */
+.section {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.section.open {
+  border-color: var(--accent);
+}
+
+.section-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: none;
+  background: none;
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  color: var(--text);
+}
+
+.chevron {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.section-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.section-hint {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.section-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  padding: 0 0.75rem 0.8rem;
+}
+
+.section-body input,
+.section-body textarea,
+.section-body select {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+}
+
+.section-body textarea {
+  resize: vertical;
+}
+
+.mini-label {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.efflorescence-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+/* Reflective lenses */
+.lenses {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.lens-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.lens-chip {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--muted);
+  border-radius: 999px;
+  padding: 0.2rem 0.65rem;
+  font-size: 0.78rem;
+}
+
+.lens-chip.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.lens-prompt {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+/* Sharing & safety */
+.sensitivity-toggle {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.sensitivity-toggle label {
   flex: 1;
   text-align: center;
   padding: 0.4rem;
   border: 1px solid var(--border);
   border-radius: 8px;
   color: var(--muted);
+  font-size: 0.85rem;
 }
 
-.type-toggle label.active {
+.sensitivity-toggle label.active {
   border-color: var(--accent);
   color: var(--accent);
   font-weight: 600;
 }
 
-.type-toggle input {
+.sensitivity-toggle input {
   display: none;
+}
+
+.govern-note {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.compose-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.privacy {
+  color: var(--muted);
+  font-size: 0.8rem;
+  margin-right: auto;
+  cursor: default;
+}
+
+.privacy.sensitive {
+  color: #b26a00;
+  font-weight: 600;
+}
+
+.saved-confirm {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.link-button {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--accent);
+  font-weight: 500;
 }
 
 /* Wiki list */
@@ -220,6 +470,16 @@ header > div {
   font-size: 1rem;
 }
 
+.head-spacer {
+  flex: 1;
+}
+
+/* When an item has no explicit title, its observation text is the lead. */
+.body-lead {
+  font-size: 1rem;
+  margin-top: 0.15rem;
+}
+
 .badge {
   font-size: 0.7rem;
   text-transform: uppercase;
@@ -229,12 +489,61 @@ header > div {
   color: #fff;
 }
 
-.badge-note {
-  background: #34c759;
+.badge-observation {
+  background: #5e6ad2;
 }
 
-.badge-bookmark {
-  background: #ff9500;
+.badge-sensitive {
+  background: #b26a00;
+}
+
+/* Enrichment shown in the one-node view */
+.media {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.4rem 0;
+}
+
+.media-thumb {
+  max-width: 120px;
+  max-height: 120px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  object-fit: cover;
+}
+
+.enrich {
+  margin: 0.35rem 0 0;
+  padding-left: 0.6rem;
+  border-left: 2px solid var(--border);
+  font-size: 0.9rem;
+  white-space: pre-wrap;
+}
+
+.enrich-efflorescence {
+  border-left-color: var(--accent);
+}
+
+.enrich-label {
+  display: block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  margin-bottom: 0.1rem;
+}
+
+.tag-lens {
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+}
+
+.provenance {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-style: italic;
 }
 
 .delete {

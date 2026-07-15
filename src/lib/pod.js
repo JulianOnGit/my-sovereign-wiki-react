@@ -26,6 +26,7 @@ import {
   setThing,
   removeThing,
   saveSolidDatasetAt,
+  saveFileInContainer,
   asUrl,
 } from "@inrupt/solid-client";
 
@@ -40,7 +41,26 @@ const SCHEMA_TEXT = "http://schema.org/text";
 const SCHEMA_URL = "http://schema.org/url";
 const SCHEMA_KEYWORDS = "http://schema.org/keywords";
 const SCHEMA_ADDITIONAL_TYPE = "http://schema.org/additionalType";
+const SCHEMA_ASSOCIATED_MEDIA = "http://schema.org/associatedMedia";
 const PROV_ATTRIBUTED_TO = "http://www.w3.org/ns/prov#wasAttributedTo";
+
+// App-local vocabulary for the enrichment fields the universal-observation
+// composer prompts for (interpretation, uncertainty, efflorescence, encounter
+// mode, reflective lenses, sensitivity, context). Namespaced under the app's own
+// GitHub Pages origin so the terms are ownable and resolvable rather than opaque.
+// These sit alongside the standard dcterms:/schema:/prov: predicates above so the
+// data stays inspectable in any Solid data browser.
+const SSW = "https://julianongit.github.io/self-sovereign-wiki/vocab#";
+const SSW_ENCOUNTER = `${SSW}encounterMode`;
+const SSW_CONTEXT = `${SSW}context`;
+const SSW_WHEN = `${SSW}when`;
+const SSW_INTERPRETATION = `${SSW}interpretation`;
+const SSW_UNCERTAINTY = `${SSW}uncertainty`;
+const SSW_EFFLORESCENCE = `${SSW}efflorescence`;
+const SSW_EFFLORESCENCE_TYPE = `${SSW}efflorescenceType`;
+const SSW_LENS = `${SSW}lens`;
+const SSW_SENSITIVITY = `${SSW}sensitivity`;
+const SSW_AUDIENCE = `${SSW}audience`;
 
 /// rdf:type marking a Thing as one of our wiki items (used to filter the index).
 const WIKI_ITEM_CLASS = "http://schema.org/CreativeWork";
@@ -106,15 +126,34 @@ export async function getOrCreateWikiDataset(session) {
   }
 }
 
-/// Convert one RDF Thing into a plain JS wiki item for the UI.
+/// Convert one RDF Thing into a plain JS observation item for the UI. Every
+/// enrichment field is optional — an observation is valid with only body text.
 function thingToItem(thing) {
+  const legacyLink = getUrl(thing, SCHEMA_URL) ?? getStringNoLocale(thing, SCHEMA_URL);
+  // Media references: uploaded/linked attachments, plus any legacy single link.
+  const media = getUrlAll(thing, SCHEMA_ASSOCIATED_MEDIA);
+  if (legacyLink && !media.includes(legacyLink)) media.unshift(legacyLink);
+
   return {
     id: asUrl(thing),
-    title: getStringNoLocale(thing, DCTERMS_TITLE) ?? "(untitled)",
+    // Title is optional. Leave it empty when absent — the UI derives a headline
+    // from the observation text rather than showing a placeholder "(untitled)".
+    title: getStringNoLocale(thing, DCTERMS_TITLE) ?? "",
     body: getStringNoLocale(thing, SCHEMA_TEXT) ?? "",
-    link: getUrl(thing, SCHEMA_URL) ?? getStringNoLocale(thing, SCHEMA_URL),
+    media,
     tags: getStringNoLocaleAll(thing, SCHEMA_KEYWORDS),
-    type: getStringNoLocale(thing, SCHEMA_ADDITIONAL_TYPE) ?? "note",
+    type: getStringNoLocale(thing, SCHEMA_ADDITIONAL_TYPE) ?? "observation",
+    // Enrichment (progressive disclosure) — any may be empty.
+    encounterMode: getStringNoLocale(thing, SSW_ENCOUNTER) ?? "",
+    context: getStringNoLocale(thing, SSW_CONTEXT) ?? "",
+    when: getStringNoLocale(thing, SSW_WHEN) ?? "",
+    interpretation: getStringNoLocale(thing, SSW_INTERPRETATION) ?? "",
+    uncertainty: getStringNoLocale(thing, SSW_UNCERTAINTY) ?? "",
+    efflorescence: getStringNoLocale(thing, SSW_EFFLORESCENCE) ?? "",
+    efflorescenceType: getStringNoLocale(thing, SSW_EFFLORESCENCE_TYPE) ?? "",
+    lenses: getStringNoLocaleAll(thing, SSW_LENS),
+    sensitivity: getStringNoLocale(thing, SSW_SENSITIVITY) ?? "private",
+    audience: getStringNoLocale(thing, SSW_AUDIENCE) ?? "",
     attributedTo: getStringNoLocale(thing, PROV_ATTRIBUTED_TO) ?? "user",
     createdAt: getDatetime(thing, DCTERMS_CREATED) ?? new Date(0),
   };
@@ -128,28 +167,92 @@ export function readItems(dataset) {
     .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 }
 
-/// Append a new wiki item and persist the index. Returns the updated dataset.
-export async function addItem(session, dataset, { title, body, link, tags, type }) {
+/// The container URL that holds the wiki index, derived from the loaded
+/// dataset's source URL by stripping the `index.ttl` document name. Used as the
+/// upload target for media attachments.
+export function wikiContainerUrl(dataset) {
+  return getSourceUrl(dataset).replace(/[^/]*$/, "");
+}
+
+/// Upload one picked file into the wiki container and return its Pod URL. Best
+/// effort: callers should catch and keep saving the observation even if this
+/// throws, so a flaky upload never costs the user their captured text.
+export async function uploadAttachment(session, containerUrl, file) {
+  const saved = await saveFileInContainer(containerUrl, file, {
+    slug: file.name,
+    contentType: file.type || "application/octet-stream",
+    fetch: session.fetch,
+  });
+  return getSourceUrl(saved);
+}
+
+/// Append a new observation and persist the index. Returns the updated dataset.
+/// Only the fields the user actually filled in are written — the whole point of
+/// the capture-first model is that an observation can be a single sentence.
+export async function addItem(session, dataset, fields) {
+  const {
+    title,
+    body,
+    tags = [],
+    media = [],
+    type = "observation",
+    encounterMode,
+    context,
+    when,
+    interpretation,
+    uncertainty,
+    efflorescence,
+    efflorescenceType,
+    lenses = [],
+    sensitivity,
+    audience,
+  } = fields;
   const indexUrl = getSourceUrl(dataset);
 
   let builder = buildThing(createThing({ name: `item-${Date.now()}` }))
     .addUrl(RDF_TYPE, WIKI_ITEM_CLASS)
-    .addStringNoLocale(DCTERMS_TITLE, title.trim() || "(untitled)")
     .addStringNoLocale(SCHEMA_TEXT, body ?? "")
     .addStringNoLocale(SCHEMA_ADDITIONAL_TYPE, type)
     .addDatetime(DCTERMS_CREATED, new Date())
     .addStringNoLocale(PROV_ATTRIBUTED_TO, "user");
 
-  if (link && link.trim()) {
-    // Store as a real URL object when it parses, else keep the raw string.
-    try {
-      builder = builder.addUrl(SCHEMA_URL, new URL(link.trim()).href);
-    } catch {
-      builder = builder.addStringNoLocale(SCHEMA_URL, link.trim());
+  // Optional single-value string fields — written only when non-empty.
+  const optionalStrings = [
+    [DCTERMS_TITLE, title],
+    [SSW_ENCOUNTER, encounterMode],
+    [SSW_CONTEXT, context],
+    [SSW_WHEN, when],
+    [SSW_INTERPRETATION, interpretation],
+    [SSW_UNCERTAINTY, uncertainty],
+    [SSW_EFFLORESCENCE, efflorescence],
+    [SSW_EFFLORESCENCE_TYPE, efflorescenceType],
+    [SSW_AUDIENCE, audience],
+    // Sensitivity always records the chosen state (defaults to "private").
+    [SSW_SENSITIVITY, sensitivity || "private"],
+  ];
+  for (const [predicate, value] of optionalStrings) {
+    if (value && String(value).trim()) {
+      builder = builder.addStringNoLocale(predicate, String(value).trim());
     }
   }
-  for (const tag of tags ?? []) {
-    if (tag.trim()) builder = builder.addStringNoLocale(SCHEMA_KEYWORDS, tag.trim());
+
+  // Media references (uploaded file URLs and pasted links) as real URLs where
+  // they parse, else kept as strings so nothing entered is silently dropped.
+  for (const ref of media) {
+    if (!ref || !String(ref).trim()) continue;
+    const value = String(ref).trim();
+    try {
+      builder = builder.addUrl(SCHEMA_ASSOCIATED_MEDIA, new URL(value).href);
+    } catch {
+      builder = builder.addStringNoLocale(SCHEMA_ASSOCIATED_MEDIA, value);
+    }
+  }
+
+  for (const tag of tags) {
+    if (tag && tag.trim()) builder = builder.addStringNoLocale(SCHEMA_KEYWORDS, tag.trim());
+  }
+  for (const lens of lenses) {
+    if (lens && lens.trim()) builder = builder.addStringNoLocale(SSW_LENS, lens.trim());
   }
 
   const updated = setThing(dataset, builder.build());
@@ -185,7 +288,21 @@ export function askPod(items, query) {
 
   const scored = items
     .map((item) => {
-      const text = [item.title, item.body, item.link ?? "", item.tags.join(" ")]
+      // Search across everything the composer can capture, so retrieval covers
+      // interpretation, uncertainty, efflorescence, context and lenses too — not
+      // just the raw observation text.
+      const text = [
+        item.title,
+        item.body,
+        item.interpretation,
+        item.uncertainty,
+        item.efflorescence,
+        item.context,
+        item.when,
+        item.tags.join(" "),
+        item.lenses.join(" "),
+        item.media.join(" "),
+      ]
         .join(" ")
         .toLowerCase();
       let score = 0;
@@ -208,8 +325,10 @@ export function askPod(items, query) {
   }
 
   const lines = scored.map((item) => {
-    const snippet = (item.body.trim() || item.link || "").slice(0, 157);
-    return `• ${item.title}${snippet ? ` — ${snippet}` : ""}`;
+    const heading = item.title || item.body.trim().split("\n")[0] || item.media[0] || "(observation)";
+    const snippet = (item.body.trim() || item.interpretation || item.media[0] || "").slice(0, 157);
+    const showSnippet = snippet && snippet !== heading;
+    return `• ${heading}${showSnippet ? ` — ${snippet}` : ""}`;
   });
 
   return {

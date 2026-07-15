@@ -10,7 +10,29 @@ Structure and CRUD flow follow the freeCodeCamp tutorial
 [*Create a Solid To-Do App With React*](https://www.freecodecamp.org/news/create-a-solid-to-do-app-with-react/)
 (`@inrupt/solid-client` + `@inrupt/solid-ui-react`, `SessionProvider`,
 `getOrCreate…` dataset, `createThing`/`setThing`/`saveSolidDatasetAt`), but the
-data model is the wiki's — **notes & bookmarks with tags** — not todos.
+data model is the wiki's — **universal observations** — not todos.
+
+## Capture model: capture first, enrich gradually
+
+The composer follows the
+[Universal Observation Capture UX profile](../../universal-observation-capture-ux-design-profile.md):
+a single generous field — *"What did you notice?"* — that saves after one
+sentence, private by default. Structure is available through optional, plain-
+language disclosures, never demanded:
+
+- **Level 1 — quick capture:** the observation, optional photo/file/link
+  attachments, voice dictation (Web Speech API, Chrome), and a private-by-default
+  save.
+- **Level 2 — Add context:** title, when, where/setting, people/topics/projects,
+  and how it was encountered (the provenance question).
+- **Level 3 — Reflect:** what it might mean, what's uncertain, what emerged
+  (efflorescence), and optional reflective *lenses* (Care, Risk, Learning,
+  Stewardship, …).
+- **Level 4 — Sharing & safety:** sensitivity marking and intended audience.
+
+Saving confirms quietly ("Saved privately.") and stays put — no forced next
+step. The Wiki tab renders a light "one-node view" of whatever enrichment the
+user chose to add.
 
 ## Login configuration (reused from app 6)
 
@@ -49,8 +71,12 @@ is stored as human-readable Turtle at `<pod>/my_sovereign_wiki/index.ttl`.
   `index.ttl` (inspectable in any Solid data browser), rather than app 6's
   per-item encrypted JSON resources. This is a deliberate rapid-dev trade-off:
   no security-key unlock step, at the cost of no client-side encryption.
-- Same vocabulary mapping as app 6's `WikiItem`: `dcterms:title`,
-  `schema:text`, `schema:url`, `schema:keywords`, `schema:additionalType`
-  (note/bookmark), `dcterms:created`, `prov:wasAttributedTo`.
+- Standard-vocabulary core (`dcterms:title`, `schema:text`,
+  `schema:associatedMedia`, `schema:keywords`, `schema:additionalType`,
+  `dcterms:created`, `prov:wasAttributedTo`) plus a small app-local vocabulary
+  (`…/self-sovereign-wiki/vocab#`) for the enrichment fields the composer
+  prompts for: `encounterMode`, `context`, `when`, `interpretation`,
+  `uncertainty`, `efflorescence`(`Type`), `lens`, `sensitivity`, `audience`.
+  Everything stays inspectable Turtle in any Solid data browser.
 - "Ask your Pod" is the same transparent, grounded keyword-overlap retrieval —
   no hosted LLM, every answer cites real Pod resources.

@@ -9,6 +9,8 @@ import {
   readItems,
   addItem,
   deleteItem,
+  wikiContainerUrl,
+  uploadAttachment,
 } from "./lib/pod.js";
 
 const TABS = ["Capture", "Wiki", "Ask your Pod"];
@@ -53,11 +55,34 @@ export default function App() {
   }, [loggedIn, session]);
 
   const handleAdd = useCallback(
-    async (fields) => {
-      const ds = await addItem(session, dataset, fields);
+    async ({ links = [], files = [], ...fields }) => {
+      if (!dataset) {
+        setStatus("Still opening your Pod — try again in a moment.");
+        throw new Error("dataset not ready");
+      }
+      // Upload picked files best-effort: a failed attachment must never cost the
+      // user their captured text, so we collect the failures and save anyway.
+      const container = wikiContainerUrl(dataset);
+      const media = [...links];
+      const failed = [];
+      for (const file of files) {
+        try {
+          media.push(await uploadAttachment(session, container, file));
+        } catch {
+          failed.push(file.name);
+        }
+      }
+
+      const ds = await addItem(session, dataset, { ...fields, media });
       setDataset(ds);
       setItems(readItems(ds));
-      setTab("Wiki");
+      setStatus(
+        failed.length
+          ? `Saved. Couldn’t attach: ${failed.join(", ")}. Your observation is safe.`
+          : null,
+      );
+      // Deliberately do NOT switch tabs: capture confirms quietly in place and
+      // lets the user decide whether to move on, rather than forcing a next step.
     },
     [session, dataset],
   );
@@ -108,7 +133,9 @@ export default function App() {
       {status && <div className="status">{status}</div>}
 
       <main>
-        {tab === "Capture" && <Capture onAdd={handleAdd} />}
+        {tab === "Capture" && (
+          <Capture onAdd={handleAdd} onViewWiki={() => setTab("Wiki")} />
+        )}
         {tab === "Wiki" && <WikiList items={items} onDelete={handleDelete} />}
         {tab === "Ask your Pod" && <AskPod items={items} />}
       </main>
