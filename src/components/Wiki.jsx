@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { buildWikiIndex, buildArticle } from "../lib/wiki.js";
+import { llmAvailable, llmProviderLabel, generateArticleSummary } from "../lib/llm.js";
 import WikiList from "./WikiList.jsx";
 
 // Wiki surface — the reading experience. A home that indexes generated articles,
@@ -38,7 +39,7 @@ function Wikilinks({ text, targets, current, onOpen }) {
   return <>{out}</>;
 }
 
-function Article({ article, onOpen, onHome }) {
+function Article({ article, onOpen, onHome, onGenerate, generating, genError }) {
   const link = (text) => (
     <Wikilinks text={text} targets={article.linkTargets} current={article.title} onOpen={onOpen} />
   );
@@ -52,7 +53,18 @@ function Article({ article, onOpen, onHome }) {
         <h1 className="wiki-title">{article.title}</h1>
 
         <p className="wiki-lead">{link(article.llm || article.lead)}</p>
-        {article.llm && <p className="wiki-generated">Summary written by your AI · grounded in the sources below</p>}
+        {article.llm ? (
+          <p className="wiki-generated">
+            Summary written by your {llmProviderLabel()} · grounded in the sources below
+          </p>
+        ) : (
+          llmAvailable() && (
+            <button className="ai-summary-btn" onClick={() => onGenerate(article)} disabled={generating}>
+              {generating ? "Writing…" : `✨ Write summary with your ${llmProviderLabel()}`}
+            </button>
+          )
+        )}
+        {genError && <p className="error-text">Couldn’t generate: {genError}</p>}
 
         {article.interpretations.length > 0 && (
           <section className="wiki-section">
@@ -119,9 +131,26 @@ function Article({ article, onOpen, onHome }) {
 export default function Wiki({ items, onDelete }) {
   const [view, setView] = useState({ kind: "home" });
   const [filter, setFilter] = useState("");
+  const [summaries, setSummaries] = useState({}); // topic name → AI summary
+  const [generating, setGenerating] = useState(null); // topic name being generated
+  const [errors, setErrors] = useState({});
   const index = useMemo(() => buildWikiIndex(items), [items]);
 
   const open = (name) => setView({ kind: "article", name });
+
+  async function handleGenerate(article) {
+    const name = article.title;
+    setGenerating(name);
+    setErrors((e) => ({ ...e, [name]: null }));
+    try {
+      const text = await generateArticleSummary(article);
+      setSummaries((s) => ({ ...s, [name]: text }));
+    } catch (err) {
+      setErrors((e) => ({ ...e, [name]: err.message }));
+    } finally {
+      setGenerating(null);
+    }
+  }
 
   if (items.length === 0) {
     return (
@@ -134,11 +163,16 @@ export default function Wiki({ items, onDelete }) {
   }
 
   if (view.kind === "article") {
+    const article = buildArticle(items, view.name);
+    article.llm = summaries[view.name] || null;
     return (
       <Article
-        article={buildArticle(items, view.name)}
+        article={article}
         onOpen={open}
         onHome={() => setView({ kind: "home" })}
+        onGenerate={handleGenerate}
+        generating={generating === view.name}
+        genError={errors[view.name]}
       />
     );
   }

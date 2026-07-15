@@ -20,9 +20,25 @@ Each tab is one stage of the sovereignty value stream, end to end:
 | **Share** | Share | Purpose-led, fine-grained access by WebID (ACP/WAC) — sharing without copying, revocable. |
 | **Govern** | Govern | Audit every grant (including the local AI), revoke all, export, and stay portable across providers. |
 
-The AI is deliberately a transparent local engine (`src/lib/organise.js`) so the
-"AI is sovereign" promise is literal; a stronger model can be swapped in behind
-the same interface without moving where trust sits.
+The AI is deliberately a transparent local engine (`src/lib/organise.js`,
+`src/lib/eudaimonia.js`, `src/lib/wiki.js`) so the "AI is sovereign" promise is
+literal and the whole app works with **zero API keys**. Optionally, connect your
+own Claude or OpenAI key (Govern → *Your AI provider*; stored only in your
+browser, called directly from it) and the LLM upgrades the generated wiki prose —
+it never changes where the data or trust lives.
+
+## Beyond the value stream
+
+- **Wiki surface** (`Wiki` tab): the captured nodes read as an actual wiki —
+  a home indexing generated articles, live article pages per topic/person with
+  lead summaries, themed sections, and inline wikilinks between articles.
+- **Journey** (`Journey` tab): a model of the user's semantic ecosystem as a
+  picture of the good life — five **capabilities** (virtue, practical wisdom,
+  social goods, material goods, moral courage) across five developmental
+  **stages** (safety baseline → order → identity → a better life → a makariotic
+  life), a roadmap, an open-ended set of **projects** derived from what emerged
+  in captures, and an effort × benefit **prioritisation matrix** (quick wins
+  top-right). All computed locally from the observations.
 
 Structure and CRUD flow follow the freeCodeCamp tutorial
 [*Create a Solid To-Do App With React*](https://www.freecodecamp.org/news/create-a-solid-to-do-app-with-react/)

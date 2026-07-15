@@ -982,6 +982,42 @@ code {
 .wiki-source-title {
   font-size: 0.9rem;
 }
+.ai-summary-btn {
+  align-self: flex-start;
+  border: 1px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  color: var(--accent);
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin: 0.2rem 0 0.4rem;
+}
+.ai-summary-btn:disabled {
+  opacity: 0.6;
+}
+
+/* AI provider form (Govern) */
+.ai-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-top: 0.6rem;
+}
+.ai-form select,
+.ai-form input {
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--text);
+  font: inherit;
+}
+.ai-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
 .wikilink {
   border: none;
   background: none;

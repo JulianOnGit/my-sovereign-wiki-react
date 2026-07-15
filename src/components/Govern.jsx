@@ -5,6 +5,7 @@ import {
   getPublicAccess,
   revokeAccess,
 } from "../lib/pod.js";
+import { getLLMConfig, setLLMConfig, clearLLMConfig } from "../lib/llm.js";
 
 // Govern stage — enduring sovereignty: audit every access grant (including the
 // AI), revoke, and stay portable. The design point is that nothing here locks
@@ -133,6 +134,8 @@ export default function Govern({ session, dataset, items }) {
         </dl>
       </div>
 
+      <AiProviderCard />
+
       <div className="card">
         <h3 className="section-heading">Access audit</h3>
         {grants === null ? (
@@ -192,6 +195,65 @@ export default function Govern({ session, dataset, items }) {
           <button className="ghost-button" onClick={() => session.logout()}>
             Log out / switch provider
           </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Your sovereign AI: choose a provider and supply your own key (stored only in
+// this browser, called directly from it). The app works fully without one — this
+// only upgrades generated prose and analysis.
+function AiProviderCard() {
+  const initial = getLLMConfig();
+  const [provider, setProvider] = useState(initial.provider);
+  const [key, setKey] = useState(initial.key);
+  const [saved, setSaved] = useState(false);
+
+  function save() {
+    setLLMConfig({ provider, key: key.trim() });
+    setSaved(true);
+  }
+  function disconnect() {
+    clearLLMConfig();
+    setProvider("none");
+    setKey("");
+    setSaved(false);
+  }
+
+  return (
+    <div className="card">
+      <h3 className="section-heading">Your AI provider</h3>
+      <p className="muted">
+        The wiki and journey work entirely on a local, transparent engine — no key
+        needed. Optionally connect your own Claude or OpenAI key to have an AI
+        write richer summaries. Your key stays in this browser and is called
+        directly; it is never sent to any server of ours.
+      </p>
+      <div className="ai-form">
+        <select value={provider} onChange={(e) => { setProvider(e.target.value); setSaved(false); }}>
+          <option value="none">None — local engine only</option>
+          <option value="anthropic">Claude (Anthropic)</option>
+          <option value="openai">OpenAI</option>
+        </select>
+        {provider !== "none" && (
+          <input
+            type="password"
+            placeholder={provider === "anthropic" ? "sk-ant-…" : "sk-…"}
+            value={key}
+            onChange={(e) => { setKey(e.target.value); setSaved(false); }}
+            autoComplete="off"
+          />
+        )}
+        <div className="ai-actions">
+          <button className="save" onClick={save} disabled={provider !== "none" && !key.trim()}>
+            {saved ? "Saved" : "Save"}
+          </button>
+          {initial.provider !== "none" && (
+            <button className="ghost-button" onClick={disconnect}>
+              Disconnect
+            </button>
+          )}
         </div>
       </div>
     </div>
