@@ -515,7 +515,7 @@ function GoodLifeMap({ spanning = [], onRevokeSpanning }) {
   return (
     <div className="card goodlife">
       <div className="share-list-head">
-        <h3 className="section-heading">Your sharing is under your control</h3>
+        <h3 className="section-heading">Your data sharing organised by purpose</h3>
         <span className="share-count-pill">{supports.length} supports</span>
       </div>
       <p className="muted">
