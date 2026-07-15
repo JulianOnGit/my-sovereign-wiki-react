@@ -3307,3 +3307,166 @@ code {
   background: color-mix(in srgb, var(--good) 12%, transparent);
   border-color: color-mix(in srgb, var(--good) 30%, transparent);
 }
+
+/* ── Ask · the inspiration loop ──────────────────────────────────────────────
+   A self-running reel under the search box: the wiki "wonders" a question,
+   thinks, and answers with a Read more, then loops. Decorative but live. */
+@keyframes ssw-inspire-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes ssw-dot {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}
+.ask-inspire {
+  border: 1px solid color-mix(in srgb, var(--accent) 26%, var(--border));
+  background:
+    radial-gradient(130% 120% at 100% 0%, color-mix(in srgb, var(--accent) 8%, transparent), transparent 55%),
+    var(--card);
+}
+.ask-inspire-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.55rem;
+}
+.ask-inspire-spark {
+  font-size: 0.95rem;
+}
+.ask-inspire-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--accent);
+}
+.ask-inspire-journey {
+  margin-left: auto;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--surface-2);
+  border-radius: 999px;
+  padding: 0.12rem 0.6rem;
+  white-space: nowrap;
+}
+.ask-inspire-q {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1.12rem;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text);
+  min-height: 1.6em;
+}
+.ask-inspire-q:hover {
+  color: var(--accent);
+}
+.ask-caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.05em;
+  margin-left: 1px;
+  vertical-align: text-bottom;
+  background: var(--accent);
+  animation: blink 1s step-start infinite;
+}
+.ask-inspire-thinking {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.7rem;
+}
+.ask-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: ssw-dot 1.2s ease-in-out infinite;
+}
+.ask-dot:nth-child(2) { animation-delay: 0.15s; }
+.ask-dot:nth-child(3) { animation-delay: 0.3s; }
+.ask-inspire-thinking-label {
+  margin-left: 0.35rem;
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-style: italic;
+}
+.ask-inspire-answer {
+  margin-top: 0.7rem;
+  animation: ssw-inspire-in 0.4s ease both;
+}
+.ask-inspire-answer p {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+.ask-readmore {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+}
+.ask-inspire-ask {
+  margin-top: 0.6rem;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+  cursor: pointer;
+}
+.ask-inspire-ask:hover {
+  text-decoration: underline;
+}
+.ask-inspire-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+  padding-top: 0.65rem;
+  border-top: 1px dashed var(--border);
+}
+.ask-inspire-pips {
+  display: flex;
+  gap: 0.35rem;
+}
+.ask-inspire-pip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: all 0.3s ease;
+}
+.ask-inspire-pip.active {
+  background: var(--accent);
+  width: 18px;
+  border-radius: 999px;
+}
+.ask-inspire-next {
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+}
+.ask-inspire-next:hover {
+  color: var(--accent);
+}

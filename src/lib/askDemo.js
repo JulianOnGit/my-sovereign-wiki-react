@@ -110,6 +110,69 @@ export const ASK_HISTORY = [
   },
 ];
 
+// ── Inspiration loop ─────────────────────────────────────────────────────────
+// A self-running "the AI is thinking of questions for you" reel that sits under
+// the search box before you've asked anything. Each entry is a question the wiki
+// could raise on your behalf and a grounded-feeling answer drawn from the demo
+// graph. The UI types the question out, "thinks", then reveals the answer with a
+// Read more — an impression of a mind at work, purely decorative but honest that
+// it's an example. Clicking a question runs it for real against the graph.
+
+export const ASK_INSPIRATIONS = [
+  {
+    journey: "Cultural appreciation",
+    icon: "🏛️",
+    question: "What thread runs through the small things you've noticed on your walks?",
+    answer:
+      "A quiet fascination with makers. The carved mason's marks on the Rennie Bridge, " +
+      "the luthier thinning a soundboard by feel at the market — again and again you stop " +
+      "for the anonymous craft hidden in everyday things. Your notes read like someone " +
+      "learning to see the hand behind the object, and starting to want to make something " +
+      "of their own from it.",
+  },
+  {
+    journey: "Care",
+    icon: "🫶",
+    question: "Is there anyone you've written about who could use looking out for?",
+    answer:
+      "Mr Alvarez keeps surfacing. He's 82, two doors down, and his bedroom faces Miller's " +
+      "Creek — the note flags he wouldn't hear a late-night flood alert and no one is " +
+      "checking on him when it storms. You already sketched a phone tree that reaches him " +
+      "first; the harder question your notes raise is whether it's been set up, or is still " +
+      "just an idea.",
+  },
+  {
+    journey: "Creativity",
+    icon: "🎨",
+    question: "What have you gathered lately that's quietly asking to become a project?",
+    answer:
+      "The mason's marks. Across three notes you've collected symbols from the Rennie Bridge " +
+      "and Kingsley Mill and wondered who cut them — and then, almost as an aside, imagined a " +
+      "letterpress specimen sheet of the district's forgotten makers. That's the shape of a " +
+      "real project hiding in your observations, one you could actually make.",
+  },
+  {
+    journey: "Calm & groundedness",
+    icon: "🌅",
+    question: "What steadies you — and are you protecting it?",
+    answer:
+      "Ten minutes at the kitchen window before anyone's up, coffee steaming, the low light " +
+      "coming up Halden Street. You called it 'a settledness worth protecting' and noticed " +
+      "the ritual is really the pause, not the coffee. The notes suggest it's the small hinge " +
+      "your calmer days turn on — worth guarding deliberately rather than by luck.",
+  },
+  {
+    journey: "Universal love",
+    icon: "💛",
+    question: "Whose everyday kindness have you been meaning to return?",
+    answer:
+      "Mr Okafor, the 6am bus driver, who holds the bus a beat at Halden Street for the " +
+      "runners every morning — unthanked. You noticed how much that tiny, unglamorous " +
+      "kindness keeps other people's mornings from unravelling, and floated leaving a written " +
+      "thank-you for him and the early-shift drivers. It's still sitting in your notes as an idea.",
+  },
+];
+
 // Human "3 days ago" style label for a timestamp, kept tiny and dependency-free.
 export function agoLabel(date) {
   const d = date instanceof Date ? date : new Date(date);

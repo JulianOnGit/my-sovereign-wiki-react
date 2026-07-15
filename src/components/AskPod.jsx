@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { retrieve } from "../lib/organise.js";
 import {
   llmAvailable,
@@ -8,7 +8,7 @@ import {
 } from "../lib/llm.js";
 import { collectTopics } from "../lib/pages.js";
 import { DEMO_ITEMS } from "../lib/demoData.js";
-import { ASK_EXAMPLES, ASK_HISTORY, agoLabel } from "../lib/askDemo.js";
+import { ASK_EXAMPLES, ASK_HISTORY, ASK_INSPIRATIONS, agoLabel } from "../lib/askDemo.js";
 
 // Ask your Wiki (Retrieve stage): grounded RAG over the user's Pod.
 //
@@ -45,6 +45,125 @@ function GroundedAnswer({ text }) {
         );
       })}
     </p>
+  );
+}
+
+// Truncate to a whole word near `n` characters, so the "(read more)" cut never
+// lands mid-word.
+function truncate(text, n) {
+  if (text.length <= n) return text;
+  const cut = text.slice(0, n);
+  const lastSpace = cut.lastIndexOf(" ");
+  return `${cut.slice(0, lastSpace > 0 ? lastSpace : n).trimEnd()}…`;
+}
+
+// The inspiration loop: a self-running impression of the wiki thinking *for*
+// you. It types out a question the graph could raise, pauses as if reading your
+// notes, reveals a grounded-feeling answer with a Read more, then moves on — and
+// loops. Decorative and clearly an example, but every question is live: click it
+// and it runs for real against the active graph. Expanding an answer pauses the
+// reel so you can actually read it.
+const INSPIRE_TRUNCATE = 172;
+function InspirationLoop({ onAsk }) {
+  const [i, setI] = useState(0);
+  const [phase, setPhase] = useState("typing"); // typing | thinking | answer
+  const [typed, setTyped] = useState("");
+  const [expanded, setExpanded] = useState(false);
+  const current = ASK_INSPIRATIONS[i];
+
+  const advance = useCallback(() => {
+    setExpanded(false);
+    setTyped("");
+    setPhase("typing");
+    setI((v) => (v + 1) % ASK_INSPIRATIONS.length);
+  }, []);
+
+  useEffect(() => {
+    if (phase === "typing") {
+      const q = ASK_INSPIRATIONS[i].question;
+      let n = 0;
+      const id = setInterval(() => {
+        n += 1;
+        setTyped(q.slice(0, n));
+        if (n >= q.length) {
+          clearInterval(id);
+          setPhase("thinking");
+        }
+      }, 26);
+      return () => clearInterval(id);
+    }
+    if (phase === "thinking") {
+      const id = setTimeout(() => setPhase("answer"), 1300);
+      return () => clearTimeout(id);
+    }
+    if (phase === "answer" && !expanded) {
+      const id = setTimeout(advance, 6000);
+      return () => clearTimeout(id);
+    }
+  }, [phase, i, expanded, advance]);
+
+  const long = current.answer.length > INSPIRE_TRUNCATE;
+
+  return (
+    <div className="card ask-inspire">
+      <div className="ask-inspire-head">
+        <span className="ask-inspire-spark" aria-hidden="true">✨</span>
+        <span className="ask-inspire-label">Your wiki is wondering…</span>
+        <span className="ask-inspire-journey">
+          <span aria-hidden="true">{current.icon}</span> {current.journey}
+        </span>
+      </div>
+
+      <button
+        type="button"
+        className="ask-inspire-q"
+        onClick={() => onAsk(current.question)}
+        title="Ask this against your graph"
+      >
+        {typed}
+        {phase === "typing" && <span className="ask-caret" aria-hidden="true" />}
+      </button>
+
+      {phase === "thinking" && (
+        <div className="ask-inspire-thinking" aria-live="polite">
+          <span className="ask-dot" />
+          <span className="ask-dot" />
+          <span className="ask-dot" />
+          <span className="ask-inspire-thinking-label">reading your notes…</span>
+        </div>
+      )}
+
+      {phase === "answer" && (
+        <div className="ask-inspire-answer">
+          <p>
+            {expanded ? current.answer : truncate(current.answer, INSPIRE_TRUNCATE)}
+            {long && (
+              <button
+                type="button"
+                className="ask-readmore"
+                onClick={() => setExpanded((v) => !v)}
+              >
+                {expanded ? " Show less" : " (read more)"}
+              </button>
+            )}
+          </p>
+          <button type="button" className="ask-inspire-ask" onClick={() => onAsk(current.question)}>
+            Ask this for real →
+          </button>
+        </div>
+      )}
+
+      <div className="ask-inspire-foot">
+        <div className="ask-inspire-pips" aria-hidden="true">
+          {ASK_INSPIRATIONS.map((_, k) => (
+            <span key={k} className={"ask-inspire-pip" + (k === i ? " active" : "")} />
+          ))}
+        </div>
+        <button type="button" className="ask-inspire-next" onClick={advance}>
+          Next ›
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -285,6 +404,8 @@ export default function AskPod({ items }) {
               stays on your device; nothing leaves your Pod.
             </p>
           </div>
+
+          <InspirationLoop onAsk={runQuery} />
 
           <div className="ask-examples">
             <div className="ask-section-heading">
