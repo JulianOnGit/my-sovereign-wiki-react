@@ -292,14 +292,75 @@ function GrantRow({ tone, icon, who, sub, modes, title, onRevoke, busy }) {
   );
 }
 
-// Your sovereign AI: choose a provider and supply your own key (stored only in
-// this browser, called directly from it). The app works fully without one — this
-// only upgrades generated prose and analysis.
+// Sovereign AI is a spectrum of options, ranked by how much of the trust stays
+// with you — from a model that never leaves your device, through your own key
+// called directly, to sovereign-jurisdiction and decentralised hosts you rent
+// rather than surrender your data to. The on-device engine and bring-your-own-key
+// paths are live today; the hosted-sovereign options are the roadmap, and are
+// labelled honestly as previews.
+const SOVEREIGN_AI_OPTIONS = [
+  {
+    key: "local",
+    icon: "🔒",
+    name: "On-device local engine",
+    tagline: "Runs in your browser, over your Pod. Nothing ever leaves the device.",
+    where: "Your device",
+    status: "active",
+  },
+  {
+    key: "anthropic",
+    icon: "✨",
+    name: "Claude (Anthropic)",
+    tagline: "Bring your own key; called straight from your browser, never via us.",
+    where: "Your key · direct call",
+    status: "key",
+  },
+  {
+    key: "openai",
+    icon: "✨",
+    name: "OpenAI",
+    tagline: "Bring your own key; called straight from your browser, never via us.",
+    where: "Your key · direct call",
+    status: "key",
+  },
+  {
+    key: "trellis",
+    icon: "🇦🇺",
+    name: "Trellis Data",
+    tagline: "Australian AI company — sovereign models held under Australian jurisdiction and law.",
+    where: "Australia",
+    status: "preview",
+  },
+  {
+    key: "rented",
+    icon: "🧩",
+    name: "Rented open-source model",
+    tagline: "Run open-weights models (Llama, Mistral, Qwen) on a cloud GPU you rent — swap hosts freely, no lock-in.",
+    where: "A cloud host you choose",
+    status: "preview",
+  },
+  {
+    key: "evernode",
+    icon: "🕸️",
+    name: "Decentralised compute · Evernode",
+    tagline: "Open-source models on decentralised hosts — no single operator, ANU-born on the XRP Ledger.",
+    where: "Decentralised network",
+    status: "preview",
+  },
+];
+
+const AI_STATUS_LABEL = { active: "Active", key: "Connect your key", preview: "Preview" };
+
+// Your sovereign AI: choose where the intelligence runs, then (for the two live
+// paths) supply your own key. The app works fully on the local engine with no key
+// — the rest only upgrade generated prose and analysis, and none of it changes
+// where the data lives.
 function AiProviderCard() {
   const initial = getLLMConfig();
   const [provider, setProvider] = useState(initial.provider);
   const [key, setKey] = useState(initial.key);
   const [saved, setSaved] = useState(false);
+  const [note, setNote] = useState(null);
 
   function save() {
     setLLMConfig({ provider, key: key.trim() });
@@ -312,6 +373,25 @@ function AiProviderCard() {
     setSaved(false);
   }
 
+  // Selecting an option: the on-device engine maps to "none", the key options set
+  // the provider, and the hosted-sovereign previews explain themselves rather than
+  // pretend to connect.
+  function choose(opt) {
+    setSaved(false);
+    if (opt.status === "preview") {
+      setNote(
+        `${opt.name} is on the sovereign-AI roadmap — a hosted option where the model runs ` +
+          `on ${opt.where.toLowerCase()} instead of a big-tech server, with your Pod still ` +
+          `the one source of truth. Today, use the on-device engine or your own key.`,
+      );
+      return;
+    }
+    setNote(null);
+    setProvider(opt.key === "local" ? "none" : opt.key);
+  }
+
+  const selectedKey = provider === "none" ? "local" : provider;
+
   const activeLabel =
     initial.provider === "anthropic"
       ? "Claude (Anthropic)"
@@ -322,24 +402,50 @@ function AiProviderCard() {
   return (
     <div className="card">
       <div className="govern-card-head">
-        <h3 className="section-heading">Your AI provider</h3>
+        <h3 className="section-heading">Your sovereign AI</h3>
         <span className={`ai-status ${initial.provider === "none" ? "is-local" : "is-connected"}`}>
           {initial.provider === "none" ? "🔒 " : "✨ "}
           {activeLabel}
         </span>
       </div>
       <p className="muted">
-        The wiki and journey work entirely on a local, transparent engine — no key
-        needed. Optionally connect your own Claude or OpenAI key to have an AI
-        write richer summaries. Your key stays in this browser and is called
-        directly; it is never sent to any server of ours.
+        Sovereignty isn't only about your data — it's about where the intelligence
+        runs, too. The wiki works entirely on a local, transparent engine with no
+        key. Beyond that you have a spectrum of sovereign options: your own key
+        called directly, an Australian provider under Australian law, or
+        open-source models you rent on cloud or decentralised hosts. In every case
+        your Pod stays the one source of truth.
       </p>
+
+      <div className="ai-options">
+        {SOVEREIGN_AI_OPTIONS.map((opt) => {
+          const on = selectedKey === opt.key;
+          return (
+            <button
+              type="button"
+              key={opt.key}
+              className={`ai-option${on ? " active" : ""} ai-option-${opt.status}`}
+              onClick={() => choose(opt)}
+            >
+              <span className="ai-option-top">
+                <span className="ai-option-icon" aria-hidden="true">{opt.icon}</span>
+                <span className="ai-option-name">{opt.name}</span>
+                <span className={`ai-option-status is-${opt.status}`}>
+                  {AI_STATUS_LABEL[opt.status]}
+                </span>
+              </span>
+              <span className="ai-option-tagline">{opt.tagline}</span>
+              <span className="ai-option-where">
+                <span aria-hidden="true">📍</span> Runs on: {opt.where}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      {note && <p className="ai-option-note">{note}</p>}
+
       <div className="ai-form">
-        <select value={provider} onChange={(e) => { setProvider(e.target.value); setSaved(false); }}>
-          <option value="none">None — local engine only</option>
-          <option value="anthropic">Claude (Anthropic)</option>
-          <option value="openai">OpenAI</option>
-        </select>
         {provider !== "none" && (
           <input
             type="password"
@@ -351,7 +457,7 @@ function AiProviderCard() {
         )}
         <div className="ai-actions">
           <button className="save" onClick={save} disabled={provider !== "none" && !key.trim()}>
-            {saved ? "Saved" : "Save"}
+            {saved ? "Saved" : provider === "none" ? "Use local engine" : "Save key"}
           </button>
           {initial.provider !== "none" && (
             <button className="ghost-button" onClick={disconnect}>

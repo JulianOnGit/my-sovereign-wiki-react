@@ -3470,3 +3470,90 @@ code {
 .ask-inspire-next:hover {
   color: var(--accent);
 }
+
+/* ── Govern · sovereign AI options ───────────────────────────────────────────
+   A spectrum of where the intelligence can run, ranked by how much trust stays
+   with you. Live paths select; hosted-sovereign previews explain themselves. */
+.ai-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  gap: 0.6rem;
+  margin: 0.9rem 0 0.6rem;
+}
+.ai-option {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  text-align: left;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.1s ease;
+}
+.ai-option:hover {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+.ai-option.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+}
+.ai-option-preview {
+  background: color-mix(in srgb, var(--surface-2) 60%, var(--card));
+}
+.ai-option-top {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+.ai-option-icon {
+  font-size: 1rem;
+}
+.ai-option-name {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--text);
+}
+.ai-option-status {
+  margin-left: auto;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  padding: 0.1rem 0.45rem;
+  white-space: nowrap;
+}
+.ai-option-status.is-active {
+  color: var(--good);
+  background: color-mix(in srgb, var(--good) 14%, transparent);
+}
+.ai-option-status.is-key {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.ai-option-status.is-preview {
+  color: var(--muted);
+  background: var(--surface-2);
+}
+.ai-option-tagline {
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.ai-option-where {
+  font-size: 0.72rem;
+  color: var(--muted);
+  opacity: 0.85;
+}
+.ai-option-note {
+  margin: 0 0 0.6rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-2));
+  border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--text);
+}
