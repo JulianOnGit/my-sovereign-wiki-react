@@ -558,28 +558,31 @@ function GoodLifeMap({ spanning = [], onRevokeSpanning }) {
               return (
                 <div key={grp.key} className="goodlife-group">
                   {grp.name && <div className="goodlife-group-name">{grp.name}</div>}
-                  {supported.map((c) => (
-                    <div key={c.key} className="goodlife-cap has-grants">
-                      <div className="goodlife-cap-head">
-                        <span className="goodlife-cap-name">{c.name}</span>
-                        <span className="goodlife-cap-tag">enabled</span>
-                      </div>
-                      <div className="goodlife-grants">
-                        {c.grants.map((g) => (
-                          <SupportRow key={g.id} grant={g} onRevoke={() => revokeSupport(g.id)} />
-                        ))}
-                      </div>
+                  {supported.length > 0 && (
+                    <div className="goodlife-cap-grid">
+                      {supported.map((c) => (
+                        <div key={c.key} className="goodlife-cap">
+                          <div className="goodlife-cap-name">
+                            <span className="goodlife-cap-dot" aria-hidden="true" />
+                            {c.name}
+                          </div>
+                          {c.grants.map((g) => (
+                            <SupportRow key={g.id} grant={g} onRevoke={() => revokeSupport(g.id)} />
+                          ))}
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                   {priv.length > 0 && (
                     <div className="goodlife-private">
+                      <span className="goodlife-private-label">🔒 Private</span>
                       {priv.map((c) => (
                         <span
                           key={c.key}
                           className="goodlife-private-chip"
                           title="No access grants — this capability stays entirely private"
                         >
-                          🔒 {c.name}
+                          {c.name}
                         </span>
                       ))}
                     </div>

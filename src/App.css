@@ -3625,6 +3625,138 @@ code {
   border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
 }
 
+/* ── Explore · emergent solution node ────────────────────────────────────────
+   A lure that sometimes surfaces among a node's related links, and the terminal
+   epiphany view it opens onto — an integrated solution with no onward links,
+   only a restart. */
+.solution-lure {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--good) 45%, var(--border));
+  border-left: 3px solid var(--good);
+  background:
+    radial-gradient(120% 140% at 0% 0%, color-mix(in srgb, var(--good) 12%, transparent), transparent 60%),
+    var(--surface-2);
+  transition: border-color 0.15s, transform 0.1s, box-shadow 0.15s;
+  animation: ssw-lure-in 0.4s ease both;
+}
+.solution-lure:hover {
+  transform: translateX(2px);
+  border-color: var(--good);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--good) 14%, transparent);
+}
+.solution-lure-badge {
+  flex: none;
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--good);
+  background: color-mix(in srgb, var(--good) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--good) 30%, transparent);
+  border-radius: 999px;
+  padding: 0.15rem 0.55rem;
+  white-space: nowrap;
+}
+.solution-lure-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+.solution-lure-title {
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--text);
+}
+.solution-lure-sub {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+@keyframes ssw-lure-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.solution-node {
+  border: 1px solid color-mix(in srgb, var(--good) 40%, var(--border));
+  background:
+    radial-gradient(130% 120% at 50% 0%, color-mix(in srgb, var(--good) 10%, transparent), transparent 65%),
+    var(--card);
+  text-align: center;
+}
+.solution-phase {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--good);
+  background: color-mix(in srgb, var(--good) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--good) 28%, transparent);
+  border-radius: 999px;
+  padding: 0.2rem 0.7rem;
+  margin-bottom: 0.7rem;
+}
+.solution-title {
+  margin: 0 0 0.5rem;
+}
+.solution-lead {
+  margin: 0 auto 1rem;
+  max-width: 34rem;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--text);
+}
+.solution-effloresce {
+  margin: 0 auto 1.2rem;
+  max-width: 34rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--good) 8%, var(--surface-2));
+  border: 1px solid color-mix(in srgb, var(--good) 28%, transparent);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text);
+}
+.solution-effloresce-label {
+  display: block;
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--good);
+  margin-bottom: 0.2rem;
+}
+.solution-actions {
+  display: flex;
+  justify-content: center;
+}
+.solution-restart {
+  border: 1px solid var(--good);
+  background: transparent;
+  color: var(--good);
+  border-radius: 999px;
+  padding: 0.5rem 1.1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.solution-restart:hover {
+  background: color-mix(in srgb, var(--good) 12%, transparent);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .explore-refresh:active {
     transform: none;
@@ -3634,6 +3766,9 @@ code {
   .graph-node-dot,
   .graph-node-label {
     transition: none;
+  }
+  .solution-lure {
+    animation: none;
   }
 }
 
@@ -4348,44 +4483,6 @@ code {
   padding: 0.12rem 0.55rem;
   white-space: nowrap;
 }
-.goodlife-caps {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
-  gap: 0.6rem;
-}
-.goodlife-cap {
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 0.6rem 0.7rem;
-  background: var(--surface-2);
-}
-.goodlife-cap.has-grants {
-  background: var(--card);
-  border-color: color-mix(in srgb, var(--gl) 30%, var(--border));
-}
-.goodlife-cap-head {
-  display: flex;
-  flex-direction: column;
-  gap: 0.05rem;
-  margin-bottom: 0.45rem;
-}
-.goodlife-cap-name {
-  font-weight: 600;
-  font-size: 0.86rem;
-  color: var(--text);
-}
-.goodlife-cap-enables {
-  font-size: 0.74rem;
-  line-height: 1.35;
-  color: var(--muted);
-}
-.goodlife-cap-empty {
-  margin: 0;
-  font-size: 0.74rem;
-  color: var(--muted);
-  opacity: 0.75;
-  font-style: italic;
-}
 .goodlife-grants {
   display: flex;
   flex-direction: column;
@@ -4577,75 +4674,76 @@ code {
 }
 
 /* ── Share · good-life map: areas → capabilities → supports ──────────────────
-   Reworked to the fuller architecture: grouped capabilities, the ones enabled by
-   a real-world support shown in full, the rest as compact private chips. */
-.goodlife-group {
-  margin-top: 0.7rem;
-}
+   Grouped capabilities: enabled ones as compact, evenly-sized cards in a grid,
+   the rest as a wrapped row of private chips. */
 .goodlife-group + .goodlife-group {
-  margin-top: 0.9rem;
+  margin-top: 0.85rem;
 }
 .goodlife-group-name {
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.07em;
   color: var(--gl, var(--muted));
-  margin-bottom: 0.4rem;
+  margin: 0.7rem 0 0.4rem;
+}
+.goodlife-cap-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(15.5rem, 1fr));
+  gap: 0.5rem;
+  align-items: start;
+  margin-bottom: 0.5rem;
 }
 .goodlife-cap {
-  border: 1px solid var(--border);
+  border: 1px solid color-mix(in srgb, var(--gl, var(--accent)) 28%, var(--border));
+  border-left: 3px solid var(--gl, var(--accent));
   border-radius: 10px;
   padding: 0.55rem 0.65rem;
-  background: var(--surface-2);
-  margin-bottom: 0.45rem;
-}
-.goodlife-cap.has-grants {
   background: var(--card);
-  border-color: color-mix(in srgb, var(--gl, var(--accent)) 32%, var(--border));
-  border-left: 3px solid var(--gl, var(--accent));
-}
-.goodlife-cap-head {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.4rem;
 }
 .goodlife-cap-name {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
   font-weight: 650;
-  font-size: 0.86rem;
+  font-size: 0.88rem;
   color: var(--text);
+  margin-bottom: 0.45rem;
 }
-.goodlife-cap-tag {
-  font-size: 0.58rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--gl, var(--accent));
-  background: color-mix(in srgb, var(--gl, var(--accent)) 14%, transparent);
-  border-radius: 999px;
-  padding: 0.08rem 0.45rem;
+.goodlife-cap-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  flex: none;
+  border-radius: 50%;
+  background: var(--gl, var(--accent));
 }
 .goodlife-private {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 0.3rem;
 }
+.goodlife-private-label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-right: 0.15rem;
+}
 .goodlife-private-chip {
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   color: var(--muted);
   background: var(--surface-2);
   border: 1px solid var(--border);
   border-radius: 999px;
-  padding: 0.14rem 0.55rem;
-  opacity: 0.8;
+  padding: 0.14rem 0.6rem;
 }
 .goodlife-support {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  padding: 0.4rem 0.5rem;
-  border: 1px solid var(--border);
+  gap: 0.5rem;
+  padding: 0.45rem 0.5rem;
   border-radius: 8px;
   background: var(--surface-2);
 }
@@ -4653,37 +4751,50 @@ code {
   margin-top: 0.35rem;
 }
 .goodlife-support-icon {
-  font-size: 1.05rem;
+  font-size: 1.15rem;
   flex: none;
+  line-height: 1;
 }
 .goodlife-support-body {
   display: flex;
   flex-direction: column;
-  gap: 0.05rem;
+  gap: 0.06rem;
   min-width: 0;
   flex: 1;
 }
 .goodlife-support-who {
-  font-size: 0.83rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: var(--text);
+  line-height: 1.25;
 }
 .goodlife-support-role {
   font-weight: 400;
   color: var(--muted);
 }
 .goodlife-support-purpose {
-  font-size: 0.74rem;
-  line-height: 1.4;
+  font-size: 0.72rem;
+  line-height: 1.35;
   color: var(--muted);
 }
 .goodlife-support-access {
   flex: none;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 600;
   color: var(--muted);
   white-space: nowrap;
 }
 .goodlife-support .revoke {
   flex: none;
+  padding: 0.25rem 0.55rem;
+  font-size: 0.72rem;
+}
+/* On a narrow card, let the access label drop so the support stays readable. */
+@media (max-width: 560px) {
+  .goodlife-support {
+    flex-wrap: wrap;
+  }
+  .goodlife-support-access {
+    order: 3;
+  }
 }
