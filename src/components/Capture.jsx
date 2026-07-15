@@ -351,7 +351,7 @@ export default function Capture({ onAdd, onViewWiki }) {
 
       {/* Optional enrichment — available, never demanded. */}
       <Section
-        label="Add context"
+        label="Add more details"
         hint="when, where, who, how you came across it"
         open={openContext}
         onToggle={() => setOpenContext((v) => !v)}
@@ -390,7 +390,7 @@ export default function Capture({ onAdd, onViewWiki }) {
       </Section>
 
       <Section
-        label="Reflect"
+        label="Impressions and personal feelings"
         hint="what it might mean, what's uncertain, what could emerge"
         open={openReflect}
         onToggle={() => setOpenReflect((v) => !v)}

@@ -11,29 +11,31 @@
 
 // ── Value streams ────────────────────────────────────────────────────────────
 // One per reflective lens (see Capture's LENSES), mapped to the user journey it
-// serves and the kind of efflorescence that journey tends to bear. Keeping the
-// journey vocabulary here is what lets the Organise tab speak the user's own
-// framework back to them.
+// serves. Each carries the journey's own arc vocabulary — what its *observation*
+// and *analysis* stages are called, and the kind of efflorescence it tends to
+// bear — so the Organise pattern cards narrate every stream in the user's own
+// framework (observation → analysis → efflorescence) rather than generic copy.
+// `observation` is a singular noun the card pluralises with a trailing "s".
 
 export const VALUE_STREAMS = [
-  { lens: "Culture", journey: "Cultural appreciation", efflorescence: "cultural efflorescences", icon: "🏛️" },
-  { lens: "Risk", journey: "World-risk awareness", efflorescence: "risk-response efflorescences", icon: "⚠️" },
-  { lens: "Care", journey: "Care", efflorescence: "care-provision efflorescences", icon: "🤲" },
-  { lens: "Values", journey: "Moral philosophy", efflorescence: "value-advocative efflorescences", icon: "⚖️" },
-  { lens: "Truth & evidence", journey: "Epistemology", efflorescence: "truth-aligned efflorescences", icon: "🔎" },
-  { lens: "Creativity", journey: "Creativity", efflorescence: "creative efflorescences", icon: "🎨" },
-  { lens: "Future", journey: "Future modelling", efflorescence: "model-efflorescences", icon: "🔮" },
-  { lens: "Learning", journey: "Learning", efflorescence: "productive efflorescences", icon: "📚" },
-  { lens: "Enjoyment", journey: "Leisure", efflorescence: "joyful efflorescences", icon: "☀️" },
-  { lens: "Groundedness", journey: "Calmness and groundedness", efflorescence: "insight-efflorescences", icon: "🧘" },
-  { lens: "Appreciation", journey: "Love of life and benevolence", efflorescence: "vivacity and good-will efflorescences", icon: "🙏" },
-  { lens: "Society & environment", journey: "Love of the world and society", efflorescence: "environmental and good-human efflorescences", icon: "🌍" },
-  { lens: "Conversation", journey: "Love of the conversational partner", efflorescence: "listening and empathising efflorescences", icon: "💬" },
-  { lens: "Universal love", journey: "Universal love for all", efflorescence: "love efflorescences", icon: "💞" },
-  { lens: "Close observation", journey: "Noticing, observing, awareness", efflorescence: "acute-awareness efflorescences", icon: "👁️" },
-  { lens: "Mastery", journey: "Skill, mastery, artisanry", efflorescence: "milestone and achievement efflorescences", icon: "🛠️" },
-  { lens: "Problem solving", journey: "Ingenuity, problem solving", efflorescence: "problem-solution efflorescences", icon: "🧩" },
-  { lens: "Stewardship", journey: "Stewardship", efflorescence: "benefaction efflorescences", icon: "🌱" },
+  { lens: "Culture", journey: "Cultural appreciation", observation: "cultural observation", analysis: "cultural analysis", efflorescence: "cultural efflorescences", icon: "🏛️" },
+  { lens: "Risk", journey: "World-risk awareness", observation: "risk observation", analysis: "risk analysis", efflorescence: "risk-response efflorescences", icon: "⚠️" },
+  { lens: "Care", journey: "Care", observation: "care observation", analysis: "care analysis", efflorescence: "care-provision efflorescences", icon: "🤲" },
+  { lens: "Values", journey: "Moral philosophy", observation: "philosophical observation", analysis: "moral analysis", efflorescence: "value-advocative efflorescences", icon: "⚖️" },
+  { lens: "Truth & evidence", journey: "Epistemology", observation: "epistemological observation", analysis: "epistemic analysis", efflorescence: "truth-aligned efflorescences", icon: "🔎" },
+  { lens: "Creativity", journey: "Creativity", observation: "creative observation", analysis: "creative analysis", efflorescence: "creative efflorescences", icon: "🎨" },
+  { lens: "Future", journey: "Future modelling", observation: "prediction and model observation", analysis: "model analysis", efflorescence: "model-efflorescences", icon: "🔮" },
+  { lens: "Learning", journey: "Learning", observation: "knowledge observation", analysis: "knowledge analysis", efflorescence: "productive efflorescences", icon: "📚" },
+  { lens: "Enjoyment", journey: "Leisure", observation: "experiential observation", analysis: "experiential analysis", efflorescence: "joyful efflorescences", icon: "☀️" },
+  { lens: "Groundedness", journey: "Calmness and groundedness", observation: "regulatory observation", analysis: "regulatory analysis", efflorescence: "insight-efflorescences", icon: "🧘" },
+  { lens: "Appreciation", journey: "Love of life and benevolence", observation: "bliss and gratitude observation", analysis: "appreciative analysis", efflorescence: "vivacity and good-will efflorescences", icon: "🙏" },
+  { lens: "Society & environment", journey: "Love of the world and society", observation: "environment and good-angel observation", analysis: "environmental analysis", efflorescence: "environmental and good-human efflorescences", icon: "🌍" },
+  { lens: "Conversation", journey: "Love of the conversational partner", observation: "heard and hearing observation", analysis: "empathetic analysis", efflorescence: "listening, including, and empathising efflorescences", icon: "💬" },
+  { lens: "Universal love", journey: "Universal love for all", observation: "eternal-love observation", analysis: "love analysis", efflorescence: "love efflorescences", icon: "💞" },
+  { lens: "Close observation", journey: "Noticing, observing, awareness", observation: "acute-awareness observation", analysis: "observational analysis", efflorescence: "acute-awareness efflorescences", icon: "👁️" },
+  { lens: "Mastery", journey: "Skill, mastery, artisanry", observation: "skill and achievement observation", analysis: "mastery analysis", efflorescence: "milestone and achievement efflorescences", icon: "🛠️" },
+  { lens: "Problem solving", journey: "Ingenuity, problem solving", observation: "problem and solution observation", analysis: "problem-solution analysis", efflorescence: "problem-solution efflorescences", icon: "🧩" },
+  { lens: "Stewardship", journey: "Stewardship", observation: "embetterment observation", analysis: "embetterment analysis", efflorescence: "benefaction efflorescences", icon: "🌱" },
 ];
 
 const STREAM_BY_LENS = Object.fromEntries(VALUE_STREAMS.map((s) => [s.lens, s]));

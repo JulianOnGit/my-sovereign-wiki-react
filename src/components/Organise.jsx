@@ -95,7 +95,7 @@ export default function Organise({ items, onOrganise }) {
       {/* ── Insights read-out ──────────────────────────────────────────────── */}
       <div className="card">
         <div className="insights-head">
-          <h3 className="section-heading">Overview of your Wiki</h3>
+          <h3 className="section-heading">Overview of your Sovereign Wiki</h3>
           {isExample && (
             <span className="example-badge" title="Shown from a built-in example graph until you've captured your own">
               example data
