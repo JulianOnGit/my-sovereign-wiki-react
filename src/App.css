@@ -744,3 +744,43 @@ header > div {
   gap: 0.4rem;
   margin-top: 0.75rem;
 }
+
+.citation-list {
+  margin-top: 0.9rem;
+}
+
+.citation-heading {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--muted);
+  margin-bottom: 0.4rem;
+}
+
+.citation {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.citation-title {
+  font-weight: 600;
+}
+
+.citation-score {
+  background: var(--accent);
+  color: #fff;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  padding: 0.05rem 0.4rem;
+}
+
+.citation-matched,
+.citation-via {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
