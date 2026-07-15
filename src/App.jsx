@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSession } from "@inrupt/solid-ui-react";
 import LoginForm from "./components/LoginForm.jsx";
+import BrandMark from "./components/BrandMark.jsx";
+import SolidStatus from "./components/SolidStatus.jsx";
 import Capture from "./components/Capture.jsx";
 import WikiList from "./components/WikiList.jsx";
 import AskPod from "./components/AskPod.jsx";
@@ -29,6 +31,9 @@ export default function App() {
   const [items, setItems] = useState([]);
   const [tab, setTab] = useState("Capture");
   const [status, setStatus] = useState(null);
+  // Real Pod-connection error (drives the honest SolidStatus indicator), kept
+  // separate from transient notices in `status`.
+  const [error, setError] = useState(null);
 
   // After Solid-OIDC returns us to /redirect.html and login completes, tidy the
   // browser URL back to / without a reload (the token exchange already used the
@@ -45,14 +50,13 @@ export default function App() {
     let cancelled = false;
     (async () => {
       try {
-        setStatus("Opening your Pod…");
+        setError(null);
         const ds = await getOrCreateWikiDataset(session);
         if (cancelled) return;
         setDataset(ds);
         setItems(readItems(ds));
-        setStatus(null);
-      } catch (error) {
-        if (!cancelled) setStatus(`Could not open your Pod: ${error.message}`);
+      } catch (e) {
+        if (!cancelled) setError(e.message);
       }
     })();
     return () => {
@@ -111,57 +115,84 @@ export default function App() {
     [session, dataset],
   );
 
-  if (sessionRequestInProgress) {
-    return <div className="center">Connecting to your Pod…</div>;
-  }
-
-  if (!loggedIn) {
+  if (!loggedIn && !sessionRequestInProgress) {
     return <LoginForm />;
   }
 
+  const connection = {
+    sessionRequestInProgress,
+    loggedIn,
+    dataset,
+    error,
+    webId: session.info.webId,
+  };
+
   return (
-    <div className="app">
-      <header>
-        <div>
-          <strong>Self-Sovereign Wiki</strong>
-          <span className="webid" title={session.info.webId}>
-            {session.info.webId}
-          </span>
+    <div className="mx-auto min-h-screen max-w-3xl px-4 pb-20">
+      <header className="flex flex-wrap items-center justify-between gap-3 py-4">
+        <div className="flex items-center gap-2.5">
+          <BrandMark size={34} />
+          <div className="leading-tight">
+            <div className="font-semibold text-[var(--text)]">My Sovereign Wiki</div>
+            <div className="text-xs text-[var(--muted)]">on your Solid Pod</div>
+          </div>
         </div>
-        <button className="logout" onClick={() => session.logout()}>
-          Log out
-        </button>
+        <div className="flex items-center gap-2">
+          <SolidStatus {...connection} />
+          <button
+            className="ghost-button !px-3 !py-1.5 text-sm"
+            onClick={() => session.logout()}
+          >
+            Sign out
+          </button>
+        </div>
       </header>
 
-      <nav className="tabs">
-        {TABS.map((t) => (
-          <button
-            key={t}
-            className={tab === t ? "active" : ""}
-            onClick={() => setTab(t)}
-          >
-            {t}
-          </button>
-        ))}
-      </nav>
+      {sessionRequestInProgress && !dataset ? (
+        <div className="center">Connecting to your Pod…</div>
+      ) : (
+        <>
+          <nav className="mb-4 flex gap-1.5 overflow-x-auto pb-1">
+            {TABS.map((t) => (
+              <button
+                key={t}
+                onClick={() => setTab(t)}
+                className={
+                  "whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm transition " +
+                  (tab === t
+                    ? "bg-[var(--accent)] font-semibold text-white"
+                    : "text-[var(--muted)] hover:bg-[var(--surface-2)]")
+                }
+              >
+                {t}
+              </button>
+            ))}
+          </nav>
 
-      {status && <div className="status">{status}</div>}
+          {error && (
+            <div className="status" role="alert">
+              Could not reach your Pod: {error}
+            </div>
+          )}
+          {status && <div className="status">{status}</div>}
 
-      <main>
-        {tab === "Capture" && (
-          <Capture onAdd={handleAdd} onViewWiki={() => setTab("Wiki")} />
-        )}
-        {tab === "Wiki" && <WikiList items={items} onDelete={handleDelete} />}
-        {tab === "Organise" && <Organise items={items} onOrganise={handleOrganise} />}
-        {tab === "Explore" && <Present items={items} />}
-        {tab === "Ask your Pod" && <AskPod items={items} />}
-        {tab === "Share" && dataset && <Share session={session} dataset={dataset} />}
-        {tab === "Govern" && dataset && (
-          <Govern session={session} dataset={dataset} items={items} />
-        )}
-      </main>
+          <main>
+            {tab === "Capture" && (
+              <Capture onAdd={handleAdd} onViewWiki={() => setTab("Wiki")} />
+            )}
+            {tab === "Wiki" && <WikiList items={items} onDelete={handleDelete} />}
+            {tab === "Organise" && <Organise items={items} onOrganise={handleOrganise} />}
+            {tab === "Explore" && <Present items={items} />}
+            {tab === "Ask your Pod" && <AskPod items={items} />}
+            {tab === "Share" && dataset && <Share session={session} dataset={dataset} />}
+            {tab === "Govern" && dataset && (
+              <Govern session={session} dataset={dataset} items={items} />
+            )}
+          </main>
 
-      {dataset && <StoreFooter dataset={dataset} count={items.length} />}
+          {dataset && <StoreFooter dataset={dataset} count={items.length} />}
+        </>
+      )}
     </div>
   );
 }
@@ -171,16 +202,19 @@ export default function App() {
 function StoreFooter({ dataset, count }) {
   const store = getStorageInfo(dataset);
   return (
-    <footer className="store-footer">
-      <span className="store-dot" aria-hidden="true">
-        ●
-      </span>
+    <footer className="mt-8 flex flex-wrap items-center gap-2 border-t border-[var(--border)] pt-3 text-xs text-[var(--muted)]">
+      <span className="inline-block h-2 w-2 rounded-full bg-emerald-500" aria-hidden="true" />
       <span>
         {count} item{count === 1 ? "" : "s"} stored as {store.format} in your Pod at{" "}
-        <span className="store-provider">{store.provider}</span>
+        <span className="text-[var(--text)]">{store.provider}</span>
       </span>
-      <a href={store.indexUrl} target="_blank" rel="noreferrer" className="store-link">
-        Inspect raw data
+      <a
+        href={store.indexUrl}
+        target="_blank"
+        rel="noreferrer"
+        className="ml-auto font-medium text-[var(--accent)] no-underline"
+      >
+        Inspect raw data →
       </a>
     </footer>
   );

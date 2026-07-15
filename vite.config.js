@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import tailwindcss from "@tailwindcss/vite";
 
 // The dev/preview server MUST run on port 4400: the Solid-OIDC client profile
 // reused from app 6 registers `http://localhost:4400/redirect.html` as a
@@ -12,7 +13,7 @@ import react from "@vitejs/plugin-react";
 // exchange using whatever URL the app is currently at, so the app must load
 // *at* `/redirect.html` (not bounce to `/`) for the redirect URI to match.
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
   server: {
     port: 4400,
     strictPort: true,
