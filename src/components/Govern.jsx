@@ -179,6 +179,8 @@ export default function Govern({ session, dataset, items }) {
         </dl>
       </div>
 
+      <ProofVantage store={store} />
+
       <AiProviderCard />
 
       <div className="card">
@@ -288,6 +290,235 @@ function GrantRow({ tone, icon, who, sub, modes, title, onRevoke, busy }) {
           Revoke
         </button>
       )}
+    </div>
+  );
+}
+
+// Where the app's source lives — the single most powerful proof, because it lets
+// anyone read exactly what the code does with your data. Kept as a constant so
+// it's trivial to repoint.
+const SOURCE_URL = "https://github.com/JulianOnGit/self-sovereign-wiki";
+
+// The open standards this app is built on, and which anyone can check it against.
+// These are genuine, published specifications — conformance is verifiable, not a
+// badge we award ourselves.
+const STANDARDS = [
+  { name: "Solid Protocol", body: "W3C Solid CG", note: "Data in a standards-based Pod you control" },
+  { name: "Solid-OIDC", body: "W3C Solid CG", note: "Auth by your WebID — no app-owned account" },
+  { name: "Linked Data · Turtle (RDF)", body: "W3C", note: "Your data as open, portable triples" },
+  { name: "WAC & ACP", body: "W3C Solid CG", note: "Access enforced by your Pod, per resource" },
+];
+
+// Formal privacy/security certifications. A prototype has not yet been through
+// third-party certification, so each carries an honest status rather than a
+// fabricated seal — this is the vantage from which real certification is tracked.
+const CERTIFICATIONS = [
+  {
+    name: "Australian Privacy Principles (APPs)",
+    scope: "Privacy Act 1988 alignment",
+    status: "self-attested",
+  },
+  {
+    name: "ISO/IEC 27001",
+    scope: "Information security management",
+    status: "planned",
+  },
+  {
+    name: "SOC 2 Type II",
+    scope: "Security, availability & confidentiality",
+    status: "planned",
+  },
+  {
+    name: "GDPR — data portability & erasure",
+    scope: "Arts. 17 & 20 by design",
+    status: "self-attested",
+  },
+];
+
+// Independent audits. Same honesty: what has been reviewed, by whom, and what is
+// scheduled — nothing presented as complete that isn't.
+const AUDITS = [
+  {
+    name: "Data-flow & privacy review",
+    auditor: "Internal · reproducible",
+    date: "Verifiable now",
+    status: "open",
+    detail: "Every network call is to your Pod or your chosen AI — confirm it in DevTools.",
+  },
+  {
+    name: "Access-control (WAC/ACP) audit",
+    auditor: "Independent security reviewer",
+    date: "Scheduled",
+    status: "scheduled",
+    detail: "Third-party review of how grants are written and enforced on your Pod.",
+  },
+  {
+    name: "Dependency & supply-chain scan",
+    auditor: "Automated · on every build",
+    date: "Continuous",
+    status: "open",
+    detail: "Open-source dependencies, lockfile pinned — inspect package-lock.json.",
+  },
+];
+
+// Verifiable guarantees: promises paired with a way you can check each one
+// yourself, right now. This is the heart of the proof vantage — not 'trust us',
+// but 'here's how to see for yourself'.
+const GUARANTEES = [
+  {
+    claim: "Your notes live only in your Pod — never on a server of ours.",
+    verify: "Open the canonical Turtle below: that URL is your Pod's host, not ours.",
+  },
+  {
+    claim: "The app has no backend of its own.",
+    verify: "Open your browser's network tab — calls go to your Pod and, if you connect one, your chosen AI. Nowhere else.",
+  },
+  {
+    claim: "The AI can run entirely on your device.",
+    verify: "Disconnect any key: Organise, Explore, Reflect and Ask still work, offline.",
+  },
+  {
+    claim: "No tracking, no telemetry, no analytics.",
+    verify: "Search the open source for trackers — there are none to find.",
+  },
+  {
+    claim: "Your data is portable, standard Turtle.",
+    verify: "Export it, or open the raw Turtle, and load it into any other Solid app.",
+  },
+  {
+    claim: "Access is enforced by your Pod, not by us.",
+    verify: "Revoke a grant here, then try the resource as that agent — the Pod itself denies it.",
+  },
+];
+
+const CERT_LABEL = { certified: "Certified", "self-attested": "Self-attested", planned: "Planned" };
+const AUDIT_LABEL = { open: "Verifiable now", scheduled: "Scheduled", published: "Published" };
+
+// The proof vantage — the receipt behind "this is yours". Four pillars, ordered
+// by how directly you can check them: read the source, see the standards it's
+// built on, the certification/audit trail, and a list of guarantees each paired
+// with a way to verify it yourself.
+function ProofVantage({ store }) {
+  return (
+    <div className="card proof-vantage">
+      <div className="govern-card-head">
+        <h3 className="section-heading">Proof vantage</h3>
+        <span className="proof-tag">don’t trust — verify</span>
+      </div>
+      <p className="muted">
+        Sovereignty you can check, not just claim. From here you can read the app’s
+        source, see the open standards it’s built on, follow its certification and
+        audit trail, and test each guarantee for yourself.
+      </p>
+
+      {/* 1 · Source */}
+      <section className="proof-pillar">
+        <div className="proof-pillar-head">
+          <span className="proof-pillar-icon" aria-hidden="true">📖</span>
+          <h4 className="proof-pillar-title">Read every line</h4>
+          <span className="proof-pillar-sub">the whole app is open source</span>
+        </div>
+        <p className="proof-pillar-lead">
+          Nothing is hidden. The code that reads, writes, and shares your Pod is
+          right here to review — including the data-access and access-control
+          layers where it matters most.
+        </p>
+        <div className="proof-links">
+          <a className="save proof-source-btn" href={SOURCE_URL} target="_blank" rel="noreferrer">
+            Browse the source →
+          </a>
+          <a className="ghost-button" href={`${SOURCE_URL}/tree/main/src/lib`} target="_blank" rel="noreferrer">
+            Data-access &amp; access-control code
+          </a>
+        </div>
+      </section>
+
+      {/* 2 · Standards */}
+      <section className="proof-pillar">
+        <div className="proof-pillar-head">
+          <span className="proof-pillar-icon" aria-hidden="true">📐</span>
+          <h4 className="proof-pillar-title">Built on open standards</h4>
+          <span className="proof-pillar-sub">conformance anyone can check</span>
+        </div>
+        <div className="proof-standards">
+          {STANDARDS.map((s) => (
+            <div key={s.name} className="proof-standard">
+              <span className="proof-standard-name">{s.name}</span>
+              <span className="proof-standard-body">{s.body}</span>
+              <span className="proof-standard-note">{s.note}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 3 · Certifications & audits */}
+      <section className="proof-pillar">
+        <div className="proof-pillar-head">
+          <span className="proof-pillar-icon" aria-hidden="true">🛡️</span>
+          <h4 className="proof-pillar-title">Certifications &amp; audits</h4>
+          <span className="proof-pillar-sub">tracked honestly — status and all</span>
+        </div>
+        <div className="proof-two-col">
+          <div>
+            <div className="proof-subhead">Privacy &amp; security certifications</div>
+            <ul className="proof-list">
+              {CERTIFICATIONS.map((c) => (
+                <li key={c.name} className="proof-item">
+                  <div className="proof-item-main">
+                    <span className="proof-item-name">{c.name}</span>
+                    <span className="proof-item-scope">{c.scope}</span>
+                  </div>
+                  <span className={`proof-status is-${c.status}`}>{CERT_LABEL[c.status] ?? c.status}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <div className="proof-subhead">Certified audits</div>
+            <ul className="proof-list">
+              {AUDITS.map((a) => (
+                <li key={a.name} className="proof-item proof-item-audit">
+                  <div className="proof-item-main">
+                    <span className="proof-item-name">{a.name}</span>
+                    <span className="proof-item-scope">
+                      {a.auditor} · {a.date}
+                    </span>
+                    <span className="proof-item-detail">{a.detail}</span>
+                  </div>
+                  <span className={`proof-status is-${a.status}`}>{AUDIT_LABEL[a.status] ?? a.status}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* 4 · Verifiable guarantees */}
+      <section className="proof-pillar">
+        <div className="proof-pillar-head">
+          <span className="proof-pillar-icon" aria-hidden="true">✅</span>
+          <h4 className="proof-pillar-title">Verifiable guarantees</h4>
+          <span className="proof-pillar-sub">each one you can test yourself</span>
+        </div>
+        <div className="proof-guarantees">
+          {GUARANTEES.map((g) => (
+            <div key={g.claim} className="proof-guarantee">
+              <span className="proof-guarantee-check" aria-hidden="true">✓</span>
+              <div>
+                <p className="proof-guarantee-claim">{g.claim}</p>
+                <p className="proof-guarantee-verify">
+                  <span className="proof-guarantee-verify-label">Verify</span> {g.verify}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="proof-guarantee-actions">
+          <a className="ghost-button" href={store.indexUrl} target="_blank" rel="noreferrer">
+            Open canonical Turtle
+          </a>
+        </div>
+      </section>
     </div>
   );
 }

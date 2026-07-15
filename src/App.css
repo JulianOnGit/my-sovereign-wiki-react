@@ -3557,3 +3557,219 @@ code {
   line-height: 1.5;
   color: var(--text);
 }
+
+/* ── Govern · the proof vantage ──────────────────────────────────────────────
+   Four pillars of "don't trust, verify": read the source, see the standards,
+   the certification/audit trail, and guarantees you can test yourself. */
+.proof-vantage {
+  border: 1px solid color-mix(in srgb, var(--good) 26%, var(--border));
+  background:
+    radial-gradient(130% 120% at 0% 0%, color-mix(in srgb, var(--good) 7%, transparent), transparent 55%),
+    var(--card);
+}
+.proof-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--good);
+  background: color-mix(in srgb, var(--good) 14%, transparent);
+  border-radius: 999px;
+  padding: 0.16rem 0.6rem;
+  white-space: nowrap;
+}
+.proof-pillar {
+  margin-top: 1.1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.proof-pillar-head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.proof-pillar-icon {
+  font-size: 1rem;
+}
+.proof-pillar-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 650;
+  color: var(--text);
+}
+.proof-pillar-sub {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.proof-pillar-lead {
+  margin: 0 0 0.7rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.proof-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.proof-source-btn {
+  text-decoration: none;
+}
+.proof-standards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+  gap: 0.55rem;
+}
+.proof-standard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+.proof-standard-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--text);
+}
+.proof-standard-body {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--accent);
+}
+.proof-standard-note {
+  font-size: 0.76rem;
+  line-height: 1.4;
+  color: var(--muted);
+}
+.proof-two-col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 1rem 1.4rem;
+}
+.proof-subhead {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  margin-bottom: 0.45rem;
+}
+.proof-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.proof-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card);
+}
+.proof-item-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  flex: 1;
+}
+.proof-item-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.proof-item-scope {
+  font-size: 0.73rem;
+  color: var(--muted);
+}
+.proof-item-detail {
+  font-size: 0.73rem;
+  line-height: 1.4;
+  color: var(--muted);
+  margin-top: 0.15rem;
+}
+.proof-status {
+  flex: none;
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  border-radius: 999px;
+  padding: 0.12rem 0.5rem;
+  white-space: nowrap;
+}
+.proof-status.is-certified,
+.proof-status.is-open,
+.proof-status.is-published {
+  color: var(--good);
+  background: color-mix(in srgb, var(--good) 14%, transparent);
+}
+.proof-status.is-self-attested {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.proof-status.is-planned,
+.proof-status.is-scheduled {
+  color: var(--warn);
+  background: color-mix(in srgb, var(--warn) 14%, transparent);
+}
+.proof-guarantees {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 0.55rem;
+}
+.proof-guarantee {
+  display: flex;
+  gap: 0.55rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+.proof-guarantee-check {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.3rem;
+  height: 1.3rem;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--good) 18%, transparent);
+  color: var(--good);
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+.proof-guarantee-claim {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 550;
+  line-height: 1.4;
+  color: var(--text);
+}
+.proof-guarantee-verify {
+  margin: 0.25rem 0 0;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: var(--muted);
+}
+.proof-guarantee-verify-label {
+  font-weight: 700;
+  color: var(--good);
+  text-transform: uppercase;
+  font-size: 0.64rem;
+  letter-spacing: 0.04em;
+  margin-right: 0.25rem;
+}
+.proof-guarantee-actions {
+  margin-top: 0.8rem;
+}
