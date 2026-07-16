@@ -5,10 +5,11 @@ import BrandMark from "./components/BrandMark.jsx";
 import SolidStatus from "./components/SolidStatus.jsx";
 import Capture from "./components/Capture.jsx";
 import Wiki from "./components/Wiki.jsx";
-import AskPod from "./components/AskPod.jsx";
+import LocalAI from "./components/LocalAI.jsx";
 import Organise from "./components/Organise.jsx";
 import Present from "./components/Present.jsx";
 import Reflect from "./components/Reflect.jsx";
+import ThemeToggle from "./components/ThemeToggle.jsx";
 import Share from "./components/Share.jsx";
 import Govern from "./components/Govern.jsx";
 import {
@@ -32,7 +33,7 @@ const TABS = [
   { label: "Wiki", slug: "wiki" },
   { label: "Organise", slug: "organise" },
   { label: "Explore", slug: "explore" },
-  { label: "Ask your Wiki", slug: "ask" },
+  { label: "Ask your LLM", slug: "ask" },
   { label: "Reflect", slug: "reflect" },
   { label: "Share", slug: "share" },
   { label: "Govern", slug: "govern" },
@@ -175,6 +176,7 @@ export default function App() {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <SolidStatus {...connection} />
           <button
             className="ghost-button !px-3 !py-1.5 text-sm"
@@ -220,7 +222,7 @@ export default function App() {
             {tab === "Wiki" && <Wiki items={items} onDelete={handleDelete} />}
             {tab === "Organise" && <Organise items={items} onOrganise={handleOrganise} />}
             {tab === "Explore" && <Present items={items} />}
-            {tab === "Ask your Wiki" && <AskPod items={items} />}
+            {tab === "Ask your LLM" && <LocalAI items={items} />}
             {tab === "Reflect" && <Reflect items={items} />}
             {tab === "Share" && dataset && (
               <Share session={session} dataset={dataset} items={items} />

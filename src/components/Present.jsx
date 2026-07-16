@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { collectTopics, collectDates, nodeView } from "../lib/pages.js";
 import { DEMO_ITEMS, DEMO_BY_ID, EXPLORE_CHAINS } from "../lib/demoData.js";
 import { useRoute } from "../lib/router.js";
+import ContentGraph from "./ContentGraph.jsx";
 
 // Present/Compose stage — navigable, human pages generated live from the graph.
 // A single component with an internal breadcrumb: the index (a graph-network
@@ -143,155 +144,9 @@ function ObservationRow({ item, onOpen }) {
 }
 
 // ── Graph-network home ───────────────────────────────────────────────────────
-// A small, deterministic force layout so the home view *looks like* a graph
-// network without any external library. Seeded so a given seed always lays out
-// the same way; bumping the seed (via Refresh) re-settles it into a fresh shape.
-
-function mulberry32(a) {
-  return function () {
-    a |= 0;
-    a = (a + 0x6d2b79f5) | 0;
-    let t = Math.imul(a ^ (a >>> 15), 1 | a);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function buildNetwork(items, seed) {
-  const W = 100;
-  const H = 60;
-  const rng = mulberry32((seed || 1) * 2654435761);
-  const nodes = items.map((it) => ({
-    id: it.id,
-    label: it.title || headline(it),
-    x: 12 + rng() * (W - 24),
-    y: 10 + rng() * (H - 20),
-    vx: 0,
-    vy: 0,
-    deg: 0,
-  }));
-  const index = new Map(nodes.map((n, i) => [n.id, i]));
-  const edges = [];
-  const seen = new Set();
-  items.forEach((it) =>
-    (it.related || []).forEach((r) => {
-      if (!index.has(r) || !index.has(it.id)) return;
-      const key = it.id < r ? it.id + "|" + r : r + "|" + it.id;
-      if (seen.has(key)) return;
-      seen.add(key);
-      const a = index.get(it.id);
-      const b = index.get(r);
-      edges.push([a, b]);
-      nodes[a].deg += 1;
-      nodes[b].deg += 1;
-    }),
-  );
-
-  // A few passes of repulsion + edge springs + gentle gravity — enough to settle
-  // a dozen nodes into a legible constellation.
-  const K = 20;
-  for (let iter = 0; iter < 280; iter++) {
-    const cool = 1 - iter / 340;
-    for (let i = 0; i < nodes.length; i++) {
-      for (let j = i + 1; j < nodes.length; j++) {
-        let dx = nodes[i].x - nodes[j].x;
-        let dy = nodes[i].y - nodes[j].y;
-        const d2 = dx * dx + dy * dy || 0.01;
-        const d = Math.sqrt(d2);
-        const f = ((K * K) / d2) * 0.9;
-        const ux = dx / d;
-        const uy = dy / d;
-        nodes[i].vx += ux * f;
-        nodes[i].vy += uy * f;
-        nodes[j].vx -= ux * f;
-        nodes[j].vy -= uy * f;
-      }
-    }
-    edges.forEach(([a, b]) => {
-      let dx = nodes[b].x - nodes[a].x;
-      let dy = nodes[b].y - nodes[a].y;
-      const d = Math.sqrt(dx * dx + dy * dy) || 0.01;
-      const f = (d - K) * 0.08;
-      const ux = dx / d;
-      const uy = dy / d;
-      nodes[a].vx += ux * f;
-      nodes[a].vy += uy * f;
-      nodes[b].vx -= ux * f;
-      nodes[b].vy -= uy * f;
-    });
-    nodes.forEach((n) => {
-      n.vx += (W / 2 - n.x) * 0.008;
-      n.vy += (H / 2 - n.y) * 0.008;
-      n.x += n.vx * cool;
-      n.y += n.vy * cool;
-      n.vx *= 0.85;
-      n.vy *= 0.85;
-    });
-  }
-
-  // Normalise the settled cloud back into the viewport with padding.
-  const pad = 9;
-  const xs = nodes.map((n) => n.x);
-  const ys = nodes.map((n) => n.y);
-  const minX = Math.min(...xs);
-  const maxX = Math.max(...xs);
-  const minY = Math.min(...ys);
-  const maxY = Math.max(...ys);
-  const s = Math.min((W - pad * 2) / (maxX - minX || 1), (H - pad * 2) / (maxY - minY || 1));
-  nodes.forEach((n) => {
-    n.x = pad + (n.x - minX) * s;
-    n.y = pad + (n.y - minY) * s;
-    n.r = 1.9 + Math.min(n.deg, 4) * 0.35;
-  });
-  return { nodes, edges, W, H };
-}
-
-function GraphNetwork({ items, seed, onOpen }) {
-  const { nodes, edges, W, H } = useMemo(() => buildNetwork(items, seed), [items, seed]);
-  if (nodes.length === 0) return null;
-  return (
-    <svg
-      className="explore-graph"
-      viewBox={`0 0 ${W} ${H}`}
-      role="img"
-      aria-label="A network graph of your observations and the links between them. Select a node to open that observation."
-    >
-      <g className="graph-edges">
-        {edges.map(([a, b], i) => (
-          <line
-            key={i}
-            className="graph-edge"
-            x1={nodes[a].x}
-            y1={nodes[a].y}
-            x2={nodes[b].x}
-            y2={nodes[b].y}
-          />
-        ))}
-      </g>
-      {nodes.map((n) => (
-        <g
-          key={n.id}
-          className="graph-node"
-          role="button"
-          tabIndex={0}
-          onClick={() => onOpen(n.id)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              onOpen(n.id);
-            }
-          }}
-        >
-          <circle className="graph-node-halo" cx={n.x} cy={n.y} r={n.r + 2.4} />
-          <circle className="graph-node-dot" cx={n.x} cy={n.y} r={n.r} />
-          <text className="graph-node-label" x={n.x} y={n.y - n.r - 1.4} textAnchor="middle">
-            {n.label.length > 20 ? n.label.slice(0, 19) + "…" : n.label}
-          </text>
-        </g>
-      ))}
-    </svg>
-  );
-}
+// The home view leads with the full Content Connections graph (ContentGraph):
+// observations, topics and files as a live force layout where clicking a node
+// centres it and illuminates its direct connections.
 
 // ── Continuation helpers ─────────────────────────────────────────────────────
 // The branch continuations offered at each stage are drawn live from the graph:
@@ -477,13 +332,13 @@ export default function Present({ items }) {
   const value = segments[2];
 
   // Example mode: default on when the user has no data of their own, so Explore
-  // is never a dead end. Users with data can toggle it to preview the vision.
-  const [demo, setDemo] = useState(items.length === 0);
+  // is never a dead end. Derived, not initial state — the Pod loads async, so a
+  // mount-time snapshot would lock the example on and hide the user's own graph
+  // when their items arrive a moment later. An explicit toggle overrides.
+  const [demoChoice, setDemoChoice] = useState(null);
+  const demo = demoChoice ?? items.length === 0;
+  const setDemo = setDemoChoice;
   const data = demo ? DEMO_ITEMS : items;
-
-  // Layout seed for the home graph. Refresh bumps it so the network re-settles
-  // into a fresh constellation and returns the user to the home view.
-  const [graphSeed, setGraphSeed] = useState(1);
 
   const topics = useMemo(() => collectTopics(data), [data]);
   const dates = useMemo(() => collectDates(data), [data]);
@@ -496,11 +351,8 @@ export default function Present({ items }) {
   const openTopic = (name) => navigate("explore", "topic", name);
   const goIndex = () => navigate("explore");
 
-  // Refresh: re-lay the graph and return to the home explore view.
-  const refresh = () => {
-    setGraphSeed((s) => s + 1);
-    goIndex();
-  };
+  // Back to the home explore view (the graph re-fits itself on mount).
+  const refresh = () => goIndex();
 
   // Toggling the example resets the route so a demo/real node id can't linger in
   // the hash and resolve against the wrong graph.
@@ -555,12 +407,13 @@ export default function Present({ items }) {
 
         <div className="card explore-graph-card">
           <div className="explore-graph-head">
-            <h2 className="section-heading">Knowledge graph</h2>
+            <h2 className="section-heading">Content connections</h2>
             <span className="muted graph-hint">
-              {data.length} observations, linked by shared topics and AI — tap a node to open it
+              every observation, topic and file — click a node to centre it and
+              light up its direct connections
             </span>
           </div>
-          <GraphNetwork items={data} seed={graphSeed} onOpen={openNode} />
+          <ContentGraph items={data} embedded onOpenItem={openNode} />
         </div>
 
         {demo && (

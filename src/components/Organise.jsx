@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { organise } from "../lib/organise.js";
+import { organiseSmart, organiseFallback } from "../lib/organiseAI.js";
+import { llmAvailable, llmProviderLabel } from "../lib/llm.js";
 import { deriveInsights } from "../lib/insights.js";
 import { DEMO_ITEMS } from "../lib/demoData.js";
 
@@ -145,6 +146,7 @@ export default function Organise({ items, onOrganise }) {
   const [stepIndex, setStepIndex] = useState(-1);
   const [metrics, setMetrics] = useState(null);
   const [summary, setSummary] = useState(null);
+  const [engine, setEngine] = useState(null); // { llm, embeddings } — what actually ran
   const [error, setError] = useState(null);
   const running = phase === "running";
 
@@ -173,27 +175,37 @@ export default function Organise({ items, onOrganise }) {
     if (running || items.length === 0) return;
     setError(null);
     setSummary(null);
+    setEngine(null);
     setPhase("running");
     setStepIndex(0);
 
-    // The real sovereign pass is fast and synchronous; compute it up front so
-    // every stage can narrate honest numbers, then pace the visible arc so the
-    // work is legible rather than instantaneous.
-    const { plan, summary: result } = organise(items);
-    setMetrics(computeOrganiseMetrics(items, result));
+    // Kick off the smart pass immediately — the user's own AI reading the notes
+    // and the semantic index linking them (organiseAI.js). It never throws:
+    // every layer that's unavailable drops down to the local heuristics. While
+    // it thinks, the heuristic result gives every early stage honest numbers.
+    const smartPromise = organiseSmart(items).catch(() => organiseFallback(items));
+    let result = organiseFallback(items);
+    setMetrics(computeOrganiseMetrics(items, result.summary));
 
     try {
       for (let i = 0; i < ORGANISE_STAGES.length; i++) {
         setStepIndex(i);
-        // "Deploy the best arrangement" is where the plan actually lands in the
-        // Pod — do the real write there, and don't advance until it succeeds.
-        if (ORGANISE_STAGES[i].key === "deploy") {
-          await Promise.all([onOrganise(plan), delay(STAGE_MS)]);
+        const key = ORGANISE_STAGES[i].key;
+        if (key === "reify") {
+          // "Reify the candidates" is where the AI's conclusions land: wait for
+          // the smart pass (however long the model takes) before moving on.
+          [result] = await Promise.all([smartPromise, delay(STAGE_MS)]);
+          setMetrics(computeOrganiseMetrics(items, result.summary));
+          setEngine(result.engine);
+        } else if (key === "deploy") {
+          // The plan actually lands in the Pod here — don't advance until the
+          // write succeeds.
+          await Promise.all([onOrganise(result.plan), delay(STAGE_MS)]);
         } else {
           await delay(STAGE_MS);
         }
       }
-      setSummary(result);
+      setSummary(result.summary);
       setStepIndex(ORGANISE_STAGES.length); // every stage complete
       setPhase("done");
     } catch (e) {
@@ -220,6 +232,11 @@ export default function Organise({ items, onOrganise }) {
             <button className="save" onClick={run} disabled={items.length === 0}>
               Organise my Wiki
             </button>
+            <p className="muted organise-engine-hint">
+              {llmAvailable()
+                ? `Engine: your ${llmProviderLabel()} reads every note to extract entities and draw links, with a semantic index behind it.`
+                : "Engine: built-in local heuristics (TF-IDF + rule-based entities). Start your local model server and this upgrades to your own AI automatically."}
+            </p>
             {items.length === 0 && (
               <p className="muted">Capture a few observations first — there is nothing to link yet.</p>
             )}
@@ -236,6 +253,7 @@ export default function Organise({ items, onOrganise }) {
             stepIndex={stepIndex}
             metrics={metrics}
             summary={summary}
+            engine={engine}
             onRerun={run}
           />
         )}
@@ -361,7 +379,7 @@ export default function Organise({ items, onOrganise }) {
 // The AI-at-work surface: a live Epiphantic run over your wiki. A progress rail,
 // then the twelve stages as a stepper — completed stages settle into a concrete
 // result, the current one pulses and narrates, the rest wait dimmed ahead.
-function OrganiseRun({ phase, stepIndex, metrics, summary, onRerun }) {
+function OrganiseRun({ phase, stepIndex, metrics, summary, engine, onRerun }) {
   const total = ORGANISE_STAGES.length;
   const completed = Math.min(stepIndex, total);
   const pct = Math.round((completed / total) * 100);
@@ -442,6 +460,12 @@ function OrganiseRun({ phase, stepIndex, metrics, summary, onRerun }) {
             {summary.distinctEntities === 1 ? "y" : "ies"} across{" "}
             <strong>{summary.items}</strong> observation
             {summary.items === 1 ? "" : "s"}. All written back to your Pod.
+            {engine && (
+              <span className="organise-engine">
+                {" "}Engine: {engine.llm ? `${engine.llm} · ` : "local heuristics · "}
+                links via {engine.embeddings}.
+              </span>
+            )}
           </div>
           <div className="organise-done-actions">
             <button
