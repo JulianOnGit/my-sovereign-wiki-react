@@ -101,10 +101,8 @@ is stored as human-readable Turtle at `<pod>/my_sovereign_wiki/index.ttl`.
 
 ## How it differs from app 6
 
-- **Unencrypted, interoperable Turtle.** Items are plain RDF Things in one
-  `index.ttl` (inspectable in any Solid data browser), rather than app 6's
-  per-item encrypted JSON resources. This is a deliberate rapid-dev trade-off:
-  no security-key unlock step, at the cost of no client-side encryption.
+- **Interoperable Turtle.** Items are plain RDF Things in one `index.ttl`,
+  human-readable and inspectable in any Solid data browser.
 - Standard-vocabulary core (`dcterms:title`, `schema:text`,
   `schema:associatedMedia`, `schema:keywords`, `schema:additionalType`,
   `dcterms:created`, `prov:wasAttributedTo`) plus a small app-local vocabulary

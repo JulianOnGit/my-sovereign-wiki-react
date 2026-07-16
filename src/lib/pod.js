@@ -1,9 +1,8 @@
 // Pod interaction layer for the Self-Sovereign Wiki React prototype.
 //
 // Thin wrapper over @inrupt/solid-client that reads and writes WikiItems as
-// plain RDF Things in a single Turtle index resource in the user's Pod. This is
-// the rapid-dev, fully interoperable analogue of app 6's encrypted-JSON store:
-// the data is human-readable Turtle you can open in any Solid data browser, and
+// plain RDF Things in a single Turtle index resource in the user's Pod. The
+// data is human-readable Turtle you can open in any Solid data browser, and
 // the fields map onto the same vocabularies app 6 documents
 // (dcterms:/schema:/prov:).
 
