@@ -6,7 +6,6 @@ import {
   stageIndex,
   quadrantOf,
   QUADRANTS,
-  matrixPosition,
 } from "../lib/eudaimonia.js";
 import { DEMO_ITEMS, DEMO_STORY } from "../lib/demoData.js";
 
@@ -19,11 +18,41 @@ const capName = (key) => CAPABILITIES.find((c) => c.key === key)?.name ?? key;
 const stageName = (key) => STAGES.find((s) => s.key === key)?.name ?? key;
 const QUAD_ORDER = ["quick-wins", "major", "fill-ins", "reconsider"];
 
-// Deterministic tiny jitter so projects sharing a cell don't fully overlap.
-function jitter(id) {
-  let h = 0;
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) % 1000;
-  return ((h % 100) / 100 - 0.5) * 7; // ±3.5%
+// Deterministic 0..1 hash of an id, so a project always lands in the same spot.
+function hash(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return (h >>> 0) / 4294967296;
+}
+
+// The four discrete effort/benefit levels plot at evenly-inset band centres
+// (not 0/33/67/100), leaving room to scatter on either side without piling onto
+// the frame. Both axes read the same way: level 1 → 84%, level 4 → 16%. For
+// effort that means "right = less effort"; for benefit, "up = more worthwhile".
+const BAND = [84, 61, 39, 16];
+
+// Deterministic 2-D scatter inside a cell: an angle + radius per id spreads
+// dots that share an effort/benefit around a disc, so nothing overlaps and no
+// row or column of dots lines up. Radius is capped so a dot never crosses into
+// a neighbouring quadrant.
+function scatter(id) {
+  const angle = hash(id) * Math.PI * 2;
+  const radius = 3 + Math.sqrt(hash(id + "~r")) * 8; // 3..11%
+  return { dx: Math.cos(angle) * radius, dy: Math.sin(angle) * radius };
+}
+
+const clampPct = (n) => Math.min(96, Math.max(4, n));
+
+// Where a project's dot sits on the matrix, as { left, top } percentages.
+function dotPosition(p) {
+  const { dx, dy } = scatter(p.id);
+  return {
+    left: clampPct(BAND[p.effort - 1] + dx),
+    top: clampPct(BAND[p.benefit - 1] + dy),
+  };
 }
 
 export default function Reflect({ items }) {
@@ -214,9 +243,7 @@ export default function Reflect({ items }) {
             </div>
 
             {projects.map((p) => {
-              const pos = matrixPosition(p);
-              const left = Math.min(96, Math.max(4, pos.x * 100 + jitter(p.id)));
-              const top = Math.min(96, Math.max(4, (1 - pos.y) * 100 + jitter(p.id + "y")));
+              const { left, top } = dotPosition(p);
               return (
                 <button
                   key={p.id}
@@ -235,8 +262,8 @@ export default function Reflect({ items }) {
               <div
                 className="matrix-tip"
                 style={{
-                  left: `${Math.min(96, Math.max(4, matrixPosition(hover).x * 100 + jitter(hover.id)))}%`,
-                  top: `${Math.min(96, Math.max(4, (1 - matrixPosition(hover).y) * 100 + jitter(hover.id + "y")))}%`,
+                  left: `${dotPosition(hover).left}%`,
+                  top: `${dotPosition(hover).top}%`,
                 }}
               >
                 <strong>{hover.title}</strong>

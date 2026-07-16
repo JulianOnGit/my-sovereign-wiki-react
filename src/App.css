@@ -858,7 +858,9 @@ code {
   grid-template-rows: 1fr 1fr;
   border: 1px solid var(--border);
   border-radius: 12px;
-  overflow: hidden;
+  /* No overflow:hidden — it would crop dot popovers that sit near an edge.
+     Each corner quadrant rounds its own outer corner instead, so the coloured
+     fills still follow the rounded frame. */
 }
 .quad {
   position: relative;
@@ -870,12 +872,12 @@ code {
   color: var(--muted);
   opacity: 0.85;
 }
-.q-major { border-right: 1px dashed var(--border); border-bottom: 1px dashed var(--border); background: color-mix(in srgb, var(--accent) 6%, transparent); }
-.q-quick { border-bottom: 1px dashed var(--border); background: color-mix(in srgb, var(--good) 8%, transparent); }
+.q-major { border-right: 1px dashed var(--border); border-bottom: 1px dashed var(--border); background: color-mix(in srgb, var(--accent) 6%, transparent); border-top-left-radius: 11px; }
+.q-quick { border-bottom: 1px dashed var(--border); background: color-mix(in srgb, var(--good) 8%, transparent); border-top-right-radius: 11px; }
 .q-quick span { color: var(--good); }
-.q-reconsider { border-right: 1px dashed var(--border); background: color-mix(in srgb, var(--warn) 7%, transparent); }
+.q-reconsider { border-right: 1px dashed var(--border); background: color-mix(in srgb, var(--warn) 7%, transparent); border-bottom-left-radius: 11px; }
 .q-reconsider span { color: var(--warn); }
-.q-fill { text-align: right; }
+.q-fill { text-align: right; border-bottom-right-radius: 11px; }
 
 .dot {
   position: absolute;
@@ -3689,58 +3691,105 @@ code {
   }
 }
 
-.solution-node {
-  border: 1px solid color-mix(in srgb, var(--good) 40%, var(--border));
-  background:
-    radial-gradient(130% 120% at 50% 0%, color-mix(in srgb, var(--good) 10%, transparent), transparent 65%),
-    var(--card);
-  text-align: center;
+/* The destination reads like an ordinary node (it reuses .node-focus), only
+   softly set apart — the emphasis lives in the spotlight on the inspiration. */
+.badge-inspiration {
+  background: color-mix(in srgb, var(--accent) 85%, var(--good));
 }
-.solution-phase {
+.inspiration-node {
+  border-color: color-mix(in srgb, var(--accent) 30%, var(--border));
+}
+/* The spotlight: a soft cone of light falling on the one line the walk turned
+   up. Subtle by default, breathing slowly so it reads as lit, not boxed. */
+.inspiration-spotlight {
+  position: relative;
+  margin-top: 0.8rem;
+  padding: 0.7rem 0.85rem 0.75rem 0.85rem;
+  border-left-width: 3px;
+  border-radius: 4px 12px 12px 4px;
+  background:
+    radial-gradient(90% 130% at 0% 50%, color-mix(in srgb, var(--accent) 13%, transparent), transparent 72%),
+    color-mix(in srgb, var(--accent) 5%, var(--surface-2));
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--accent) 20%, transparent),
+    0 8px 26px -14px color-mix(in srgb, var(--accent) 60%, transparent);
+  animation: ssw-spotlight 4s ease-in-out infinite;
+}
+.inspiration-spotlight .enrich-label {
+  color: var(--accent);
+}
+@keyframes ssw-spotlight {
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--accent) 18%, transparent),
+      0 8px 26px -16px color-mix(in srgb, var(--accent) 45%, transparent);
+  }
+  50% {
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--accent) 30%, transparent),
+      0 10px 30px -10px color-mix(in srgb, var(--accent) 70%, transparent);
+  }
+}
+.inspiration-context-label {
+  display: block;
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: var(--muted);
+  margin-top: 0.3rem;
+}
+.inspiration-kind {
   display: inline-block;
+  margin: 0.1rem 0 0.45rem;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.02em;
-  color: var(--good);
-  background: color-mix(in srgb, var(--good) 12%, transparent);
-  border: 1px solid color-mix(in srgb, var(--good) 28%, transparent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
   border-radius: 999px;
-  padding: 0.2rem 0.7rem;
-  margin-bottom: 0.7rem;
+  padding: 0.12rem 0.6rem;
 }
-.solution-title {
+.inspiration-line {
   margin: 0 0 0.5rem;
-}
-.solution-lead {
-  margin: 0 auto 1rem;
-  max-width: 34rem;
-  font-size: 0.95rem;
-  line-height: 1.6;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.45;
   color: var(--text);
 }
-.solution-effloresce {
-  margin: 0 auto 1.2rem;
-  max-width: 34rem;
-  padding: 0.75rem 0.9rem;
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--good) 8%, var(--surface-2));
-  border: 1px solid color-mix(in srgb, var(--good) 28%, transparent);
-  font-size: 0.95rem;
+.inspiration-why {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
   line-height: 1.55;
   color: var(--text);
 }
-.solution-effloresce-label {
+.inspiration-do-label {
   display: block;
   font-size: 0.66rem;
-  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--good);
-  margin-bottom: 0.2rem;
+  letter-spacing: 0.05em;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 0.3rem;
 }
-.solution-actions {
+.inspiration-do-list {
+  margin: 0;
+  padding-left: 1.15rem;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
+  gap: 0.28rem;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+.inspiration-do-list li::marker {
+  color: var(--accent);
+}
+.inspiration-actions {
+  display: flex;
+  justify-content: flex-start;
 }
 .solution-restart {
   border: 1px solid var(--good);
@@ -3767,7 +3816,8 @@ code {
   .graph-node-label {
     transition: none;
   }
-  .solution-lure {
+  .solution-lure,
+  .inspiration-spotlight {
     animation: none;
   }
 }

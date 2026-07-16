@@ -368,6 +368,14 @@ function OrganiseRun({ phase, stepIndex, metrics, summary, onRerun }) {
   const done = phase === "done";
   const current = done ? null : ORGANISE_STAGES[stepIndex];
 
+  // Once the run finishes, the twelve-stage trace collapses down to just the
+  // outcome summary — the play-by-play has served its purpose. A disclosure keeps
+  // it a click away for anyone who wants to audit exactly what the agent did.
+  const [stepsOpen, setStepsOpen] = useState(false);
+  // The trace stays mounted so it can animate open/closed; it only collapses once
+  // the run is done and the user hasn't chosen to keep it open.
+  const collapsed = done && !stepsOpen;
+
   return (
     <div className="organise-run">
       <div className="organise-run-head">
@@ -391,31 +399,39 @@ function OrganiseRun({ phase, stepIndex, metrics, summary, onRerun }) {
         </span>
       </div>
 
-      <div className="organise-progress" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
-        <span className="organise-progress-bar" style={{ width: `${pct}%` }} />
-      </div>
+      <div
+        className="organise-collapsible"
+        data-collapsed={collapsed || undefined}
+        aria-hidden={collapsed || undefined}
+      >
+        <div className="organise-collapsible-inner">
+          <div className="organise-progress" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100}>
+            <span className="organise-progress-bar" style={{ width: `${pct}%` }} />
+          </div>
 
-      <ol className="organise-steps">
-        {ORGANISE_STAGES.map((stage, i) => {
-          const state = i < stepIndex || done ? "done" : i === stepIndex ? "active" : "todo";
-          return (
-            <li key={stage.key} className={`organise-step is-${state}`}>
-              <span className="organise-step-marker" aria-hidden="true">
-                {state === "done" ? "✓" : state === "active" ? <span className="organise-spinner" /> : stage.n}
-              </span>
-              <div className="organise-step-body">
-                <span className="organise-step-title">{stage.title}</span>
-                {state === "active" && (
-                  <span className="organise-step-line">{stage.active}</span>
-                )}
-                {state === "done" && metrics && (
-                  <span className="organise-step-detail">{stage.detail(metrics)}</span>
-                )}
-              </div>
-            </li>
-          );
-        })}
-      </ol>
+          <ol className="organise-steps">
+            {ORGANISE_STAGES.map((stage, i) => {
+              const state = i < stepIndex || done ? "done" : i === stepIndex ? "active" : "todo";
+              return (
+                <li key={stage.key} className={`organise-step is-${state}`}>
+                  <span className="organise-step-marker" aria-hidden="true">
+                    {state === "done" ? "✓" : state === "active" ? <span className="organise-spinner" /> : stage.n}
+                  </span>
+                  <div className="organise-step-body">
+                    <span className="organise-step-title">{stage.title}</span>
+                    {state === "active" && (
+                      <span className="organise-step-line">{stage.active}</span>
+                    )}
+                    {state === "done" && metrics && (
+                      <span className="organise-step-detail">{stage.detail(metrics)}</span>
+                    )}
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </div>
+      </div>
 
       {done && summary && (
         <div className="organise-done">
@@ -427,9 +443,19 @@ function OrganiseRun({ phase, stepIndex, metrics, summary, onRerun }) {
             <strong>{summary.items}</strong> observation
             {summary.items === 1 ? "" : "s"}. All written back to your Pod.
           </div>
-          <button className="ghost-button organise-rerun" onClick={onRerun}>
-            Re-organise
-          </button>
+          <div className="organise-done-actions">
+            <button
+              className="organise-steps-toggle"
+              onClick={() => setStepsOpen((v) => !v)}
+              aria-expanded={stepsOpen}
+            >
+              <span className="organise-steps-chev" aria-hidden="true">▸</span>
+              {stepsOpen ? "Hide the twelve stages" : "Show the twelve stages"}
+            </button>
+            <button className="ghost-button organise-rerun" onClick={onRerun}>
+              Re-organise
+            </button>
+          </div>
         </div>
       )}
     </div>

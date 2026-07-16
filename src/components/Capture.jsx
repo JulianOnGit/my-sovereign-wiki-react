@@ -390,20 +390,20 @@ export default function Capture({ onAdd, onViewWiki }) {
       </Section>
 
       <Section
-        label="Impressions and personal feelings"
-        hint="what it might mean, what's uncertain, what could emerge"
+        label="Impressions and feelings"
+        hint="the impression it left, how it felt, what emerged"
         open={openReflect}
         onToggle={() => setOpenReflect((v) => !v)}
       >
         <textarea
           rows={2}
-          placeholder="What do you think it might mean?"
+          placeholder="What impression did this leave you with?"
           value={interpretation}
           onChange={(e) => setInterpretation(e.target.value)}
         />
         <textarea
           rows={2}
-          placeholder="What remains uncertain?"
+          placeholder="What did it make you feel?"
           value={uncertainty}
           onChange={(e) => setUncertainty(e.target.value)}
         />
