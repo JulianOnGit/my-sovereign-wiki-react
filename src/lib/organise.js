@@ -1,0 +1,301 @@
+// Organise stage — the "sovereign AI overnode", implemented as a fully local,
+// transparent, dependency-free pass over the user's own observations.
+//
+// Deliberately no hosted LLM and no data leaving the Pod: relatedness is a
+// TF-IDF cosine-similarity vector index and entity extraction is rule-based.
+// This keeps the "AI is sovereign" promise literal — the agent runs on the
+// user's device over the user's data, and everything it concludes is written
+// back into the Pod as ordinary triples (schema:mentions, ssw:relatedTo) that
+// any Solid tool can read, audit, or delete. A stronger model can be swapped in
+// later behind the same interface without changing where trust sits.
+
+const STOPWORDS = new Set(
+  ("the a an and or but if then else of to in on at by for with from into over " +
+    "is are was were be been being it its this that these those i me my we our you " +
+    "your they them their he she his her as so not no yes do does did done have has " +
+    "had will would can could should may might must just about which who what when " +
+    "where why how than too very can't won't don't more most some any all each")
+    .split(" "),
+);
+
+// Capitalised words that commonly start sentences — filtered out of the
+// proper-noun heuristic so "The", "Today" etc. aren't mistaken for entities.
+const NAME_STOP = new Set([
+  "The", "A", "An", "I", "It", "This", "That", "These", "Those", "We", "My", "Our",
+  "You", "Your", "They", "He", "She", "But", "And", "Or", "If", "So", "Then",
+  "Today", "Tomorrow", "Yesterday", "When", "Where", "What", "Why", "How", "There",
+  "Here", "After", "Before", "During", "While", "Because",
+]);
+
+// Porter-lite suffix strip so "reading" meets "read", "marks" meets "marked" —
+// enough stemming for retrieval to match across word forms without a library.
+function stem(t) {
+  if (t.length > 5 && t.endsWith("ing")) return t.slice(0, -3);
+  if (t.length > 4 && (t.endsWith("ed") || t.endsWith("es"))) return t.slice(0, -2);
+  if (t.length > 3 && t.endsWith("s")) return t.slice(0, -1);
+  return t;
+}
+
+export function tokenize(text) {
+  return (text || "")
+    .toLowerCase()
+    .split(/[^a-z0-9]+/)
+    .filter((t) => t.length > 2 && !STOPWORDS.has(t))
+    .map(stem);
+}
+
+// Everything meaningful the composer can capture, joined for indexing.
+function itemText(item) {
+  return [
+    item.title,
+    item.body,
+    item.interpretation,
+    item.uncertainty,
+    item.efflorescence,
+    item.context,
+    (item.tags || []).join(" "),
+    (item.lenses || []).join(" "),
+  ]
+    .filter(Boolean)
+    .join(" ");
+}
+
+// Build a TF-IDF vector per observation across the whole corpus.
+function buildVectors(items) {
+  const docs = items.map((it) => ({ id: it.id, tokens: tokenize(itemText(it)) }));
+  const df = new Map();
+  for (const d of docs) {
+    for (const t of new Set(d.tokens)) df.set(t, (df.get(t) || 0) + 1);
+  }
+  const N = Math.max(docs.length, 1);
+  return docs.map((d) => {
+    const tf = new Map();
+    for (const t of d.tokens) tf.set(t, (tf.get(t) || 0) + 1);
+    const vec = new Map();
+    const len = Math.max(d.tokens.length, 1);
+    for (const [t, f] of tf) {
+      const idf = Math.log((N + 1) / ((df.get(t) || 0) + 1)) + 1;
+      vec.set(t, (f / len) * idf);
+    }
+    return { id: d.id, vec };
+  });
+}
+
+function cosine(a, b) {
+  let dot = 0;
+  let na = 0;
+  let nb = 0;
+  for (const [t, w] of a) {
+    na += w * w;
+    if (b.has(t)) dot += w * b.get(t);
+  }
+  for (const [, w] of b) nb += w * w;
+  return na && nb ? dot / (Math.sqrt(na) * Math.sqrt(nb)) : 0;
+}
+
+// For each observation, the top-N most similar others above a threshold.
+export function relatedLinks(items, { topN = 4, threshold = 0.08 } = {}) {
+  const vectors = buildVectors(items);
+  const result = new Map();
+  for (const a of vectors) {
+    const sims = [];
+    for (const b of vectors) {
+      if (a.id === b.id) continue;
+      const score = cosine(a.vec, b.vec);
+      if (score >= threshold) sims.push({ id: b.id, score });
+    }
+    sims.sort((x, y) => y.score - x.score);
+    result.set(a.id, sims.slice(0, topN));
+  }
+  return result;
+}
+
+// Entities an observation refers to: the user's own tags (declared entities)
+// plus capitalised proper-noun candidates extracted from the title and body.
+export function extractEntities(item) {
+  const found = new Set((item.tags || []).filter(Boolean));
+  const text = [item.title, item.body].filter(Boolean).join(". ");
+  const re = /\b([A-Z][a-zA-Z]+(?:\s+[A-Z][a-zA-Z]+)*)\b/g;
+  let match;
+  while ((match = re.exec(text))) {
+    const candidate = match[1].trim();
+    if (candidate.length < 3) continue;
+    if (NAME_STOP.has(candidate)) continue;
+    // Skip all-caps single tokens that are likely acronyms of stopwords, keep
+    // genuine multi-word or capitalised names.
+    found.add(candidate);
+  }
+  return [...found];
+}
+
+// ── Retrieve ─────────────────────────────────────────────────────────────────
+// Grounded vector RAG over the same local index: embed the query in the corpus
+// TF-IDF space, rank observations by cosine similarity, then expand along the
+// AI's relatedTo links so retrieval is graph-aware. Every result is a real Pod
+// resource — "provenance, not vibes".
+
+function buildSearchIndex(items) {
+  const docs = items.map((it) => ({ item: it, tokens: tokenize(itemText(it)) }));
+  const df = new Map();
+  for (const d of docs) for (const t of new Set(d.tokens)) df.set(t, (df.get(t) || 0) + 1);
+  const N = Math.max(docs.length, 1);
+  const idf = (t) => Math.log((N + 1) / ((df.get(t) || 0) + 1)) + 1;
+  const vecOf = (tokens) => {
+    const tf = new Map();
+    for (const t of tokens) tf.set(t, (tf.get(t) || 0) + 1);
+    const len = Math.max(tokens.length, 1);
+    const v = new Map();
+    for (const [t, f] of tf) v.set(t, (f / len) * idf(t));
+    return v;
+  };
+  const docVecs = docs.map((d) => ({
+    item: d.item,
+    vec: vecOf(d.tokens),
+    tokenSet: new Set(d.tokens),
+  }));
+  return { docVecs, vecOf };
+}
+
+// Ranked observations for a query, each with its similarity score and the query
+// terms it actually matched (so the UI can explain *why* it surfaced).
+export function search(items, query, { topN = 5, threshold = 0.02 } = {}) {
+  const qTokens = tokenize(query);
+  if (!qTokens.length) return [];
+  const { docVecs, vecOf } = buildSearchIndex(items);
+  const qVec = vecOf(qTokens);
+  const qSet = new Set(qTokens);
+  return docVecs
+    .map((d) => ({
+      item: d.item,
+      score: cosine(qVec, d.vec),
+      matched: [...qSet].filter((t) => d.tokenSet.has(t)),
+    }))
+    .filter((r) => r.score >= threshold)
+    .sort((a, b) => b.score - a.score)
+    .slice(0, topN);
+}
+
+// A small spread across the corpus — evenly spaced rather than the first N, so a
+// representative sample shows the wiki's range instead of one cluster.
+function spread(items, n) {
+  if (items.length <= n) return items.slice();
+  const step = items.length / n;
+  return Array.from({ length: n }, (_, i) => items[Math.floor(i * step)]);
+}
+
+// The closest observations to a query even when none clear the relevance bar.
+// This keeps "Ask" useful on a miss: rather than a dead end, the caller (and the
+// user's own AI) still has real Pod material to reason over. Ranks by score; when
+// the query shares no vocabulary with the corpus at all — every score zero — it
+// falls back to a representative sample so there is always something real on hand.
+export function nearest(items, query, { topN = 5 } = {}) {
+  if (!items.length) return [];
+  const qTokens = tokenize(query);
+  const { docVecs, vecOf } = buildSearchIndex(items);
+  const qVec = vecOf(qTokens);
+  const qSet = new Set(qTokens);
+  const ranked = docVecs
+    .map((d) => ({
+      item: d.item,
+      score: cosine(qVec, d.vec),
+      matched: [...qSet].filter((t) => d.tokenSet.has(t)),
+    }))
+    .sort((a, b) => b.score - a.score);
+  if (ranked[0] && ranked[0].score > 0) return ranked.slice(0, topN);
+  return spread(items, topN).map((item) => ({ item, score: 0, matched: [] }));
+}
+
+// Full grounded answer: ranked citations plus graph-expanded connected items,
+// with copy that stays honest when the Pod contains no match.
+export function retrieve(items, query, { topN = 5 } = {}) {
+  if (!tokenize(query).length) {
+    return {
+      answer: "Type a question or a few keywords to search your knowledge graph.",
+      citations: [],
+      connected: [],
+      fallback: [],
+    };
+  }
+
+  const hits = search(items, query, { topN });
+  if (!hits.length) {
+    // Nothing cleared the relevance bar. Rather than a dead end, surface the
+    // closest real material the Pod holds so the answer can stay grounded in the
+    // user's own notes — honest that none matched exactly, never a guess.
+    const fallback = nearest(items, query, { topN });
+    return {
+      answer: fallback.length
+        ? "Nothing in your Pod matches that directly yet — your knowledge graph only " +
+          "holds what you've captured. Here is the closest it contains, so the answer " +
+          "stays grounded in your own notes rather than a guess:"
+        : "Nothing in your Pod matches that yet, and there's nothing captured to draw " +
+          "on. Capture an observation and it becomes answerable here.",
+      citations: [],
+      connected: [],
+      fallback,
+    };
+  }
+
+  // Expand along AI-derived links: surface related observations the direct
+  // ranking missed, attributed to the hit that reached them.
+  const byId = new Map(items.map((i) => [i.id, i]));
+  const seen = new Set(hits.map((h) => h.item.id));
+  const connected = [];
+  for (const hit of hits) {
+    for (const relId of hit.item.related || []) {
+      if (!seen.has(relId) && byId.has(relId)) {
+        seen.add(relId);
+        connected.push({ item: byId.get(relId), via: hit.item });
+      }
+    }
+  }
+
+  const headline = (it) => it.title || it.body.trim().split("\n")[0] || "(observation)";
+  const lines = hits.map((h) => {
+    const snippet = (h.item.body.trim() || h.item.interpretation || "").slice(0, 157);
+    const head = headline(h.item);
+    return `• ${head}${snippet && snippet !== head ? ` — ${snippet}` : ""}`;
+  });
+
+  let answer =
+    `Grounded in ${hits.length} observation${hits.length === 1 ? "" : "s"} from your Pod:\n\n` +
+    lines.join("\n");
+  if (connected.length) {
+    answer +=
+      `\n\nAlso connected through the AI's links: ` +
+      connected.map((c) => headline(c.item)).join(", ") +
+      ".";
+  }
+  answer += "\n\nEvery item cited is a real resource in your own Pod.";
+
+  return { answer, citations: hits, connected, fallback: [] };
+}
+
+// Run the whole organise pass and return a per-item plan plus a summary the UI
+// can show — what the agent extracted and linked, before it is written back.
+export function organise(items) {
+  const related = relatedLinks(items);
+  const plan = new Map();
+  let entityCount = 0;
+  let linkCount = 0;
+  for (const item of items) {
+    const mentions = extractEntities(item);
+    const links = (related.get(item.id) || []).map((r) => r.id);
+    entityCount += mentions.length;
+    linkCount += links.length;
+    plan.set(item.id, { mentions, related: links });
+  }
+  // Distinct entities across the corpus, for the summary and topic index.
+  const distinctEntities = new Set();
+  for (const { mentions } of plan.values()) mentions.forEach((m) => distinctEntities.add(m));
+
+  return {
+    plan,
+    summary: {
+      items: items.length,
+      entities: entityCount,
+      distinctEntities: distinctEntities.size,
+      links: linkCount,
+    },
+  };
+}

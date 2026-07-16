@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Signing in…</title>
+  </head>
+  <body>
+    <!--
+      Solid-OIDC redirect target. This is a real second entry point (not a
+      bounce page) that mounts the same app: @inrupt completes the token
+      exchange using the current URL, which must equal the registered redirect
+      URI `http://localhost:4400/redirect.html`. Once login completes App.jsx
+      tidies the URL back to `/`.
+    -->
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
