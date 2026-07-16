@@ -1,25 +1,32 @@
 // ── Solid app registration ───────────────────────────────────────────────────
 //
-// These values are the login-flow configuration reused verbatim from app 6
-// (6-self-sovereign-wiki-2). `APP_CLIENT_ID` resolves to a publicly hosted
-// Solid-OIDC client profile document whose `redirect_uris` list must contain
-// exactly `REDIRECT_URL`; if it does not, the identity provider rejects login.
+// These values are the login-flow configuration. `APP_CLIENT_ID` resolves to a
+// publicly hosted Solid-OIDC client profile document whose `redirect_uris` list
+// must contain exactly `REDIRECT_URL`; if it does not, the identity provider
+// rejects login.
 //
-// Source: 6-self-sovereign-wiki-2/my_sovereign_wiki/lib/constants/app.dart
-//         and .../solid/client-profile.jsonld
+// The client profile document is now served from this app's OWN origin
+// (public/solid/client-profile.jsonld → https://mysovereignwiki.org/solid/...),
+// so app 8 no longer depends on app 6's GitHub Pages repo. Its `redirect_uris`
+// list both the production apex origin and `http://localhost:4400` for dev.
 
 /// Public Solid-OIDC client profile document (static client registration).
+/// MUST be byte-for-byte the URL this document is actually served from.
 export const APP_CLIENT_ID =
-  "https://julianongit.github.io/self-sovereign-wiki/solid/client-profile.jsonld";
+  "https://mysovereignwiki.org/solid/client-profile.jsonld";
 
 /// Human-readable client name shown on the identity provider's consent screen.
 /// Matches `client_name` in the hosted client profile document.
 export const CLIENT_NAME = "MySovereignWiki";
 
-/// The redirect URI the identity provider returns to. MUST be one of the
-/// `redirect_uris` registered in the client profile document, and the dev
-/// server MUST be served from this exact origin/port (see vite.config.js).
-export const REDIRECT_URL = "http://localhost:4400/redirect.html";
+/// The redirect URI the identity provider returns to. Derived from the current
+/// origin so one build serves both `http://localhost:4400` (dev) and
+/// `https://mysovereignwiki.org` (prod). Whatever origin this resolves to MUST
+/// be listed in the client profile document's `redirect_uris`.
+export const REDIRECT_URL =
+  typeof window !== "undefined"
+    ? `${window.location.origin}/redirect.html`
+    : "http://localhost:4400/redirect.html";
 
 /// Default Solid server / OIDC issuer. Derived from app 6's registered redirect
 /// host (`*.solidcommunity.au`). Users on another Pod provider can override this
